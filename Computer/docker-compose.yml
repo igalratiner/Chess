@@ -1,0 +1,6 @@
+version: '3'
+services:
+  computer:
+    build: .
+    ports:
+      - "2357:5100"
