@@ -1,6 +1,8 @@
 version: '3'
 services:
   computer:
-    build: .
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
     ports:
-      - "2357:5100"
+      - "5123:2357"
