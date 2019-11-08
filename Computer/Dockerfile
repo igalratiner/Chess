@@ -6,4 +6,4 @@ RUN gradle build
 FROM openjdk:8-jre-slim
 
 COPY --from=build /home/gradle/src/Computer/build/libs/*.jar /app/computer.jar
-RUN java -jar /app/computer.jar
+ENTRYPOINT java -jar /app/computer.jar
