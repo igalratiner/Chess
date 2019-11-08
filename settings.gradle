@@ -1,4 +1,5 @@
 rootProject.name = 'Chess'
 include 'Computer'
 include 'Server'
+include 'Engine'
 

@@ -1,8 +1,0 @@
-version: '3'
-services:
-  computer:
-    build:
-      context: ..
-      dockerfile: ./Dockerfile
-    ports:
-      - "5123:2357"
