@@ -5,7 +5,7 @@ public class Main {
                 //sending the actual Thread of execution to sleep X milliseconds
                 Thread.sleep(3000);
             } catch(InterruptedException ie) {}
-            System.out.println("Hello from Computer!");
+            System.out.println("Hello from Engine!");
         }
     }
 }

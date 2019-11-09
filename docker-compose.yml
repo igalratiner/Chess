@@ -1,10 +1,28 @@
 version: '3'
 services:
+
   chess-server:
-    build: .
+    build:
+      context: .
+      dockerfile: ./Server/Dockerfile
     ports:
-      - "2357:5050"
-  chess-server-db:
+      - "5111:5000"
+
+  computer-opponent:
+    build:
+      context: .
+      dockerfile: ./Computer/Dockerfile
+    ports:
+      - "5112:5000"
+
+  chess-engine:
+    build:
+      context: .
+      dockerfile: ./Engine/Dockerfile
+    ports:
+      - "5114:5000"
+
+  chess-db:
     image: mysql:5.7
     restart: always
     environment:
@@ -17,13 +35,13 @@ services:
       MYSQL_ROOT_PASSWORD: 'password'
     ports:
       # <Port exposed> : < MySQL Port running inside container>
-      - '7532:3306'
+      - '5113:3306'
     expose:
       # Opens port 3306 on the container
       - '3306'
       # Where our data will be persisted
     volumes:
-      - my-db:/var/lib/mysql
+      - db:/var/lib/mysql
 # Names our volume
 volumes:
-  my-db:
+  db:
