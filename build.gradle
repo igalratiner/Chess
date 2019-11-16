@@ -7,3 +7,11 @@ subprojects {
         }
     }
 }
+
+dependencies {
+    classpath 'javax.ws.rs:jsr311-api:1.1.1'
+
+    implementation 'com.sun.jersey:jersey-server:1.13'
+    implementation 'com.sun.jersey:jersey-core:1.13'
+    implementation 'com.sun.jersey:jersey-servlet:1.13'
+}
