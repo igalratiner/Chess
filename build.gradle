@@ -1,17 +1,9 @@
 subprojects {
-    afterEvaluate {
-        repositories {
-            mavenLocal()
-            mavenCentral()
-            jcenter() // dependencies are fetched from the Bintray’s JCenter Maven repository
-        }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter() // dependencies are fetched from the Bintray’s JCenter Maven repository
     }
 }
 
-dependencies {
-    classpath 'javax.ws.rs:jsr311-api:1.1.1'
-
-    implementation 'com.sun.jersey:jersey-server:1.13'
-    implementation 'com.sun.jersey:jersey-core:1.13'
-    implementation 'com.sun.jersey:jersey-servlet:1.13'
-}
