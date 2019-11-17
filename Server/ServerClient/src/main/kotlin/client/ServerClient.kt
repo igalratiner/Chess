@@ -1,10 +1,7 @@
 package client
 
-import HttpClient
-
 
 class ServerClient {
-    val yo = HttpClient()
 
     companion object {
 
