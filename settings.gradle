@@ -3,3 +3,10 @@ include 'Computer'
 include 'Server'
 include 'Engine'
 
+rootProject.children.each {
+    subproject -> subproject.buildFileName = "${subproject.name}.gradle"
+}
+include ':Server:ServerClient'
+include ':Utils:HttpClient'
+//findProject(':Utils:HttpClient')?.buildFileName = 'HttpClient'
+
