@@ -1,7 +1,10 @@
 package client
 
+import HttpClient
+
 
 class ServerClient {
+    val client = HttpClient()
 
     companion object {
 
