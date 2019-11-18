@@ -8,6 +8,7 @@ import io.ktor.features.CallLogging
 import io.ktor.features.DefaultHeaders
 import io.ktor.response.respondText
 import io.ktor.routing.get
+import io.ktor.routing.post
 import io.ktor.routing.routing
 import org.koin.Logger.slf4jLogger
 import org.koin.core.KoinApplication.Companion.logger
@@ -31,8 +32,12 @@ fun Application.module() {
 // Routing section
     routing {
         get("/hello") {
-            logger.info("Entered endpoint 'hello'")
+            logger.info("Entered get endpoint 'hello'")
             call.respondText(service.sayHello())
+        }
+        post("/hello") {
+            logger.info("Entered post endpoint 'hello'")
+            call.respondText(call.request.toString()+" : " + service.sayHello())
         }
     }
 }

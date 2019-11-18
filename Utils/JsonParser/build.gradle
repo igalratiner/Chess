@@ -1,11 +1,8 @@
 plugins {
     id 'java'
-    id 'kotlin'
 }
 
-println "yo ServerClient"
-
-version '1.0-SNAPSHOT'
+version 'unspecified'
 
 sourceCompatibility = 1.8
 
@@ -14,8 +11,8 @@ repositories {
 }
 
 dependencies {
-    compile project(':Utils:HttpClient')
-    compile project(':Utils:JsonParser')
+    compile 'com.google.code.gson:gson:2.8.6'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+println "hello from JsonParser"
