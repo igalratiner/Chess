@@ -10,6 +10,6 @@ fun main(args: Array<String>) {
     //            System.out.println("Hello from Engine!");
     //        }
     val serverClient = ServerClient()
-    print(serverClient.sayHelloToMyself("hello from engine"))
+    println(serverClient.sayHelloToMyself(Bla(b="d")))
 }
 

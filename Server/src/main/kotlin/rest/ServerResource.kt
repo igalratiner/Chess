@@ -1,11 +1,18 @@
 package rest
 
+import Bla
 import di.serviceModule
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
+import io.ktor.gson.gson
+import io.ktor.request.receive
+import io.ktor.request.receiveChannel
+import io.ktor.request.receiveText
+import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
@@ -15,6 +22,7 @@ import org.koin.core.KoinApplication.Companion.logger
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.inject
 import service.ServerService
+import java.text.DateFormat
 
 
 fun Application.module() {
@@ -25,6 +33,12 @@ fun Application.module() {
         slf4jLogger()
         modules(serviceModule)
     }
+    install(ContentNegotiation) {
+        gson {
+            setDateFormat(DateFormat.LONG)
+            setPrettyPrinting()
+        }
+    }
 
 // Lazy inject HelloService
     val service by inject<ServerService>()
@@ -33,11 +47,13 @@ fun Application.module() {
     routing {
         get("/hello") {
             logger.info("Entered get endpoint 'hello'")
-            call.respondText(service.sayHello())
+            call.respond(Bla(b="f"))
         }
         post("/hello") {
             logger.info("Entered post endpoint 'hello'")
-            call.respondText(call.request.toString()+" : " + service.sayHello())
+            val some : Bla = call.receive()
+            logger.info(some.toString() + ", b value=" + some.b)
+            call.respond(Bla(b="f"))
         }
     }
 }

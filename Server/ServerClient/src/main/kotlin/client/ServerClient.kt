@@ -1,16 +1,16 @@
 package client
 
 
-import Gson.Gson
 import HttpClient
+import com.google.gson.GsonBuilder
 
 
 class ServerClient {
-    val client = HttpClient()
-    val gson = Gson.getGson()
+    val client = HttpClient("http://localhost:1517")
+    val gson = GsonBuilder().setPrettyPrinting().create()
 
-    fun sayHelloToMyself(greetings : String) : String {
-        return client.post("http://localhost:1517$HELLO_PATH", gson.toJson(greetings))
+    fun sayHelloToMyself(greetings : Any) : Bla {
+        return gson.fromJson(client.post(HELLO_PATH, greetings).body?.string(), Bla::class.java)
     }
 
     companion object {
