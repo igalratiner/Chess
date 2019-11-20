@@ -1,6 +1,6 @@
 package rest
 
-import Bla
+import client.Bla
 import di.serviceModule
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -10,10 +10,7 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
 import io.ktor.gson.gson
 import io.ktor.request.receive
-import io.ktor.request.receiveChannel
-import io.ktor.request.receiveText
 import io.ktor.response.respond
-import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
@@ -23,7 +20,6 @@ import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.inject
 import service.ServerService
 import java.text.DateFormat
-
 
 fun Application.module() {
     // Install Ktor features
@@ -46,14 +42,14 @@ fun Application.module() {
 // Routing section
     routing {
         get("/hello") {
-            logger.info("Entered get endpoint 'hello'")
-            call.respond(Bla(b="f"))
+            logger.info("Return back a message from Server: ${service.sayHello()}")
+            call.respond(Bla("Server", service.sayHello()))
         }
         post("/hello") {
-            logger.info("Entered post endpoint 'hello'")
-            val some : Bla = call.receive()
-            logger.info(some.toString() + ", b value=" + some.b)
-            call.respond(Bla(b="f"))
+            val messageReceived : Bla = call.receive()
+            logger.info("A message from ${messageReceived.holder}: ${messageReceived.message}")
+            logger.info("Return back a message from Server: ${service.sayHello()}")
+            call.respond(Bla("Server", service.sayHello()))
         }
     }
 }

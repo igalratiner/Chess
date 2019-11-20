@@ -1,5 +1,5 @@
 version '1.0-SNAPSHOT'
-println "yo yo Engine"
+
 sourceCompatibility = 1.8
 
 dependencies {
@@ -19,3 +19,4 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+

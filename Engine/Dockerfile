@@ -6,4 +6,4 @@ RUN gradle build
 FROM openjdk:8-jre-slim
 
 COPY --from=build /home/gradle/src/Engine/build/libs/*.jar /app/engine.jar
-ENTRYPOINT java -jar /app/engine.jar
+ENTRYPOINT java -jar /app/engine.jar http://chess-server:1517

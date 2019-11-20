@@ -13,10 +13,11 @@ fun main(args: Array<String>) {
         logger.info ("No args")
         ServerClient()
     }
-    val messageToSend = Bla("Engine", "hello from Engine")
+    val messageToSend = Bla("Computer", "hello from Computer")
     while(true) {
         TimeUnit.SECONDS.sleep(1L)
-        logger.info("message to send from Engine: $messageToSend")
+        logger.info("message to send from Computer: $messageToSend")
         logger.info(serverClient.sayHelloToMyself(messageToSend).toString())
     }
 }
+

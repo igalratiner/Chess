@@ -1,5 +1,5 @@
 package service
 
 class ServerService {
-    fun sayHello() : String = "hello mamasita from Server"
+    fun sayHello() : String = "hello from Server"
 }
