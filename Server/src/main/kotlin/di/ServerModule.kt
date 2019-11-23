@@ -1,9 +1,14 @@
 package di
 
-import org.koin.dsl.module
-import org.koin.experimental.builder.single
+import com.google.inject.AbstractModule
+import io.ktor.application.Application
+import rest.ServerResource
 import service.ServerService
 
-val serviceModule = module(createdAtStart = true) {
-    single<ServerService>()
+class ServerModule(private val application: Application) : AbstractModule() {
+    override fun configure() {
+        bind(Application::class.java).toInstance(application)
+        bind(ServerResource::class.java).asEagerSingleton()
+        bind(ServerService::class.java).asEagerSingleton()
+    }
 }
