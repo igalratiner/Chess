@@ -14,14 +14,6 @@ jar {
                 'Main-Class': 'MainKt'
         )
     }
-<<<<<<< HEAD:Engine/Engine.gradle
-
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
-=======
->>>>>>> master:Server/Server.gradle
 
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
