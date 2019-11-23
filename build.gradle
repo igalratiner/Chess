@@ -11,11 +11,6 @@ subprojects {
         // Kotlin
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-        // Koin
-        compile "org.koin:koin-ktor:$koin_version"
-        compile "org.koin:koin-logger-slf4j:$koin_version"
-        testCompile "org.koin:koin-test:$koin_version"
-
         // Ktor
         compile "io.ktor:ktor-server-netty:$ktor_version"
         compile "io.ktor:ktor-gson:$ktor_version"
