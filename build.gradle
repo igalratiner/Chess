@@ -11,6 +11,9 @@ subprojects {
         // Kotlin
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
+        // Guice
+        compile "com.google.inject:guice:$guice_version"
+
         // Ktor
         compile "io.ktor:ktor-server-netty:$ktor_version"
         compile "io.ktor:ktor-gson:$ktor_version"
