@@ -6,11 +6,11 @@ import java.util.concurrent.TimeUnit
 
 fun main(args: Array<String>) {
     val logger = KotlinLogging.logger {}
-    val serverClient = if (args.isNotEmpty()) {
-        logger.info { args[0] }
+    val serverClient: ServerClient
+    serverClient = if (args.isNotEmpty()) {
+        logger.info { args }
         ServerClient(args[0])
     } else {
-        logger.info ("No args")
         ServerClient()
     }
     val messageToSend = Bla("Engine", "hello from Engine")
@@ -20,3 +20,4 @@ fun main(args: Array<String>) {
         logger.info(serverClient.sayHelloToMyself(messageToSend).toString())
     }
 }
+
