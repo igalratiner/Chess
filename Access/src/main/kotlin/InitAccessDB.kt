@@ -1,6 +1,10 @@
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.transactions.transaction
 
-fun initEngineDB(dbURL: String = "localhost:5113", driver: String = "com.mysql.jdbc.Driver", username: String = "root", password: String ="password") {
-    Database.connect("jdbc:mysql://$dbURL/db", driver = driver, user = username, password = password)
+fun initAccessDB(dbURL: String = "localhost:5113", driver: String = "com.mysql.jdbc.Driver", username: String = "root", password: String ="password") {
+    Database.connect("jdbc:mysql://$dbURL/access", driver = driver, user = username, password = password)
     transaction {
         SchemaUtils.create(UserCredentials, SessionTokens)
     }

@@ -11,10 +11,10 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import mu.KotlinLogging
 
-import service.ServerService
+import service.AccessService
 
 
-class AccessResource @Inject constructor(application: Application, service: ServerService)  {
+class AccessResource @Inject constructor(application: Application, service: AccessService)  {
     init {
         val logger = KotlinLogging.logger {}
         application.routing {
