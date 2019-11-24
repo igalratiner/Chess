@@ -8,7 +8,7 @@ rootProject.children.each {
 }
 include ':Server:ServerClient'
 include ':Utils:HttpClient'
-//findProject(':Utils:HttpClient')?.buildFileName = 'HttpClient'
 include ':Utils:JsonParser'
 include ':Utils:Database'
+include ':Access:client'
 
