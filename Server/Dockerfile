@@ -6,4 +6,4 @@ RUN gradle build
 FROM openjdk:8-jre-slim
 
 COPY --from=build /home/gradle/src/Server/build/libs/*.jar /app/server.jar
-ENTRYPOINT java -jar /app/server.jar
+ENTRYPOINT java -jar /app/server.jar chess-db:5113
