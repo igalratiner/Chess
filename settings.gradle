@@ -3,6 +3,7 @@ include 'Computer'
 include 'Server'
 include 'Engine'
 include 'Access'
+include 'accounts'
 
 rootProject.children.each {
     subproject -> subproject.buildFileName = "${subproject.name}.gradle"
@@ -12,4 +13,5 @@ include ':Utils:HttpClient'
 include ':Utils:JsonParser'
 include ':Utils:Database'
 include ':Access:client'
+include ':accounts:client'
 

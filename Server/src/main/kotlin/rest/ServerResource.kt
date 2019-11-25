@@ -11,7 +11,7 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import mu.KotlinLogging
 
-import service.ServerService
+import services.ServerService
 
 
 class ServerResource @Inject constructor(application: Application, service: ServerService)  {

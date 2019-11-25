@@ -1,0 +1,4 @@
+package requests
+
+class AccountRequest {
+}

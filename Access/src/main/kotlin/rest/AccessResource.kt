@@ -14,32 +14,35 @@ import io.ktor.routing.routing
 import mu.KotlinLogging
 import requests.Credentials
 
-import service.AccessService
+import services.AccessService
+import services.LoginService
+import services.SignupService
 
 
-class AccessResource @Inject constructor(application: Application, service: AccessService)  {
+class AccessResource @Inject constructor(application: Application, accessService: AccessService, loginService: LoginService,
+                                         signupService: SignupService)  {
     init {
         val logger = KotlinLogging.logger {}
         application.routing {
             get("/hello") {
-                logger.info("Return back a message from Server: ${service.sayHello()}")
-                call.respond(Bla("Server", service.sayHello()))
+                logger.info("Return back a message from Server: ${accessService.sayHello()}")
+                call.respond(Bla("Server", accessService.sayHello()))
             }
             post("/hello") {
                 val messageReceived: Bla = call.receive()
                 logger.info("A message from ${messageReceived.holder}: ${messageReceived.message}")
-                logger.info("Return back a message from Server: ${service.sayHello()}")
-                call.respond(Bla("Server", service.sayHello()))
+                logger.info("Return back a message from Server: ${accessService.sayHello()}")
+                call.respond(Bla("Server", accessService.sayHello()))
             }
             post(LOGIN_PATH) {
                 val messageReceived: Credentials = call.receive()
                 logger.info("$messageReceived")
-                call.respond(Bla("Server", service.sayHello()))
+                call.respond(Bla("Server", accessService.sayHello()))
             }
             post(SIGNUP_PATH) {
                 val messageReceived: Credentials = call.receive()
                 logger.info("$messageReceived")
-                call.respond(Bla("Server", service.sayHello()))
+                call.respond(Bla("Server", accessService.sayHello()))
             }
         }
     }

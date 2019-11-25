@@ -11,12 +11,13 @@ fun initAccessDB(dbURL: String = "localhost:5113", driver: String = "com.mysql.j
 }
 
 object UserCredentials : Table() {
-    val userId = integer("id").autoIncrement().primaryKey()
+    val id = integer("id").autoIncrement().primaryKey()
     val username = varchar("username", 50)
     val password = varchar("password", 50)
 }
 
 object SessionTokens : Table() {
-    val userId = integer("id").autoIncrement().primaryKey()
+    val id = integer("id").autoIncrement().primaryKey()
+    val userId = integer("user_id").uniqueIndex().references(UserCredentials.id)
     val sessionToken = varchar("session_token", 50)
 }

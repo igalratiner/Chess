@@ -1,5 +1,5 @@
-package service
+package services
 
-class AccessService {
+class ServerService {
     fun sayHello() : String = "hello from Server"
 }
