@@ -1,17 +1,10 @@
 import io.ktor.application.Application
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import mu.KotlinLogging
 import rest.module
 
-
-fun main(args: Array<String>) {
-    val logger = KotlinLogging.logger {}
-    if (args.isNotEmpty()) {
-        logger.info { args }
-        initAccountsDB(args[1])
-    } else {
-        initAccountsDB()
+class Main {
+    fun main() {
+        embeddedServer(Netty, 1517, module = Application::module).start()
     }
-    embeddedServer(Netty, 1517, module = Application::module).start()
 }

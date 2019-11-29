@@ -32,7 +32,7 @@ class AccountsResource @Inject constructor(application: Application, accountsSer
             }
             post(ACCOUNT_PATH) {
                 val accountRequest: AccountRequest = call.receive()
-                logger.info("$accountRequest")
+                logger.info("account request=$accountRequest was received")
                 call.respond(accountsService.createAccount(accountRequest))
             }
         }

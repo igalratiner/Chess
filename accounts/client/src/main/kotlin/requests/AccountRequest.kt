@@ -1,4 +1,3 @@
 package requests
 
-class AccountRequest {
-}
+data class AccountRequest(val username: String)

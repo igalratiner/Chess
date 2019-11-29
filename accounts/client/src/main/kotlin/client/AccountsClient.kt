@@ -4,7 +4,7 @@ package client
 import HttpClient
 import com.google.gson.GsonBuilder
 import requests.AccountRequest
-import responses.Account
+import pojo.Account
 
 
 class AccountsClient(clientUrl: String  = "http://localhost:1517") {

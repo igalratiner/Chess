@@ -1,5 +1,6 @@
 package rest
 
+import ExposedModule
 import com.google.inject.Guice
 import di.AccountsModule
 import io.ktor.application.Application
@@ -12,7 +13,7 @@ import org.slf4j.event.Level
 import java.text.DateFormat
 
 fun Application.module() {
-    Guice.createInjector(AccountsModule(this))
+    Guice.createInjector(AccountsModule(this), ExposedModule())
 
     // Install Ktor features
     install(DefaultHeaders)

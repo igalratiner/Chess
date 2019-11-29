@@ -1,12 +1,19 @@
 package services
 
+import com.google.inject.Inject
+import dao.AccountsDao
+import mu.KLogging
 import requests.AccountRequest
-import responses.Account
+import pojo.Account
 
-class AccountsService {
+class AccountsService @Inject constructor(val accountsDao: AccountsDao) {
+    companion object : KLogging()
+
     fun sayHello() : String = "hello from Server"
 
     fun createAccount(accountRequest: AccountRequest): Account {
-        return Account()
+        val account = accountsDao.createAccount(accountRequest.username)
+        logger.info { "account=$account was created" }
+        return account
     }
 }

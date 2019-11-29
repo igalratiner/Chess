@@ -4,9 +4,9 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.transactions.transaction
 
 fun initAccountsDB(dbURL: String = "localhost:5113", driver: String = "com.mysql.jdbc.Driver", username: String = "root", password: String ="password") {
-    Database.connect("jdbc:mysql://$dbURL/access", driver = driver, user = username, password = password)
+    Database.connect("jdbc:mysql://$dbURL/accounts", driver = driver, user = username, password = password)
     transaction {
-        SchemaUtils.create(Accounts, AccountDescriptions)
+        SchemaUtils.create(Accounts, AccountStatuses)
     }
 }
 
@@ -15,7 +15,7 @@ object Accounts : Table() {
     val username = varchar("username", 50)
 }
 
-object AccountDescriptions : Table() {
+object AccountStatuses : Table() {
     val id = integer("id").autoIncrement().primaryKey()
     val accountId = integer("account_id").uniqueIndex().references(Accounts.id)
     val rate = integer("rate").default(1500)
