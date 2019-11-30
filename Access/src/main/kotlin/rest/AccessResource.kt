@@ -35,14 +35,18 @@ class AccessResource @Inject constructor(application: Application, accessService
                 call.respond(Bla("Server", accessService.sayHello()))
             }
             post(LOGIN_PATH) {
-                val messageReceived: Credentials = call.receive()
-                logger.info("$messageReceived")
-                call.respond(Bla("Server", accessService.sayHello()))
+                val credentials: Credentials = call.receive()
+                logger.info("credentials received for login $credentials")
+                val sessionToken = loginService.login(credentials.username, credentials.password)
+                logger.info("sessionToken for login $sessionToken")
+                call.respond(sessionToken)
             }
             post(SIGNUP_PATH) {
-                val messageReceived: Credentials = call.receive()
-                logger.info("$messageReceived")
-                call.respond(Bla("Server", accessService.sayHello()))
+                val credentials: Credentials = call.receive()
+                logger.info("credentials received for signup $credentials")
+                val sessionToken = signupService.processSignup(credentials.username, credentials.password)
+                logger.info("sessionToken for signup $sessionToken")
+                call.respond(sessionToken)
             }
         }
     }

@@ -11,6 +11,7 @@ class ExposedModule(private val dbName: String) : AbstractModule() {
     @Provides
     fun getJDBCDataSource(): DataSource {
         val props = Properties()
+        props.setProperty("driverClassName", "com.mysql.jdbc.Driver")
         props.setProperty("dataSource.user", "root")
         props.setProperty("dataSource.password", "password")
         props.setProperty("jdbcUrl", "jdbc:mysql://localhost:5113/$dbName")

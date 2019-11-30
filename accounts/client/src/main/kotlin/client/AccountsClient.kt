@@ -7,7 +7,7 @@ import requests.AccountRequest
 import pojo.Account
 
 
-class AccountsClient(clientUrl: String  = "http://localhost:1517") {
+class AccountsClient(clientUrl: String  = "http://localhost:1561") {
     private val client = HttpClient(clientUrl)
     private val gson = GsonBuilder().setPrettyPrinting().create()
 

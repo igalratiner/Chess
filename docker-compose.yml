@@ -29,6 +29,13 @@ services:
     ports:
       - "5115:5000"
 
+  accounts:
+    build:
+      context: .
+      dockerfile: ./accounts/Dockerfile
+    ports:
+      - "5116:5000"
+
   chess-db:
     build:
       context: .

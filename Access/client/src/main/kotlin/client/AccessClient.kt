@@ -3,11 +3,12 @@ package client
 
 import HttpClient
 import com.google.gson.GsonBuilder
+import pojos.SessionToken
 import requests.Credentials
 import responses.Session
 
 
-class AccessClient(clientUrl: String  = "http://localhost:1517") {
+class AccessClient(clientUrl: String  = "http://localhost:1551") {
     private val client = HttpClient(clientUrl)
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
@@ -15,12 +16,13 @@ class AccessClient(clientUrl: String  = "http://localhost:1517") {
         return gson.fromJson(client.post(HELLO_PATH, greetings).body?.string(), Bla::class.java)
     }
 
-    fun login(loginCredentials: Credentials) : Session {
-        return gson.fromJson(client.post(LOGIN_PATH, loginCredentials).body?.string(), Session::class.java)
+    fun login(loginCredentials: Credentials) : SessionToken {
+        return gson.fromJson(client.post(LOGIN_PATH, loginCredentials).body?.string(), SessionToken::class.java)
     }
 
-    fun signup(signupCredentials: Credentials) : Session {
-        return gson.fromJson(client.post(SIGNUP_PATH, signupCredentials).body?.string(), Session::class.java)
+    fun signup(signupCredentials: Credentials) : SessionToken {
+        val response = client.post(SIGNUP_PATH, signupCredentials)
+        return gson.fromJson(response.body?.string(), SessionToken::class.java)
     }
 
     companion object {

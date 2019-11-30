@@ -1,6 +1,7 @@
 package dao
 
 import com.google.inject.Inject
+import md5
 import mu.KLogging
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
@@ -23,19 +24,20 @@ class UserCredentialsDao @Inject constructor(dataSource: DataSource) {
         }
     }
 
-    fun checkUserCredentialsExist(username: String, password: String): Boolean {
+    fun getUserId(username: String, password: String): Int? {
         return transaction(db) {
-            UserCredentialsEntry.find { (UserCredentials.username eq username) and (UserCredentials.password eq password)}
-        }.let { userCredentials -> userCredentials.count() == 1 }
+            UserCredentialsEntry.find { (UserCredentials.username eq username) and (UserCredentials.password eq password.md5()) }
+                    .firstOrNull()?.id?.value
+        }
     }
 
     fun createUserCredentials(username: String, password: String) : Int {
         return transaction(db) {
             UserCredentialsEntry.new {
                 this.username = username
-                this.password = password
-            }
-        }.id.value
+                this.password = password.md5()
+            }.id.value
+        }
     }
 }
 

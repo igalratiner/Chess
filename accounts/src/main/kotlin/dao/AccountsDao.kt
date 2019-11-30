@@ -25,18 +25,19 @@ class AccountsDao @Inject constructor(dataSource: DataSource) {
 
     fun getAccountById(id: Int): Account? {
         return transaction(db) {
-            AccountEntry.findById(id)
-        }?.let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
+            AccountEntry.findById(id)?.let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
+        }
     }
 
     fun getAccountByUsername(username: String): Account? = transaction(db) {
-        AccountEntry.find { Accounts.username eq username}
-    }.let {
-        return if (it.empty()) {
-            null
-        } else {
-            it.elementAt(0).let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
-        }
+        AccountEntry.find { Accounts.username eq username }
+                .let {
+                    if (it.empty()) {
+                        null
+                    } else {
+                        it.elementAt(0).let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
+                    }
+                }
     }
 
     fun createAccount(username: String) : Account {
@@ -44,7 +45,8 @@ class AccountsDao @Inject constructor(dataSource: DataSource) {
             AccountEntry.new {
                 this.username = username
             }
-        }.let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
+                    .let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
+        }
     }
 }
 

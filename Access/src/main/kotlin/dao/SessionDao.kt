@@ -1,6 +1,7 @@
 package dao
 
 import com.google.inject.Inject
+import md5
 import mu.KLogging
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
@@ -8,15 +9,11 @@ import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import pojos.SessionToken
-import java.math.BigInteger
-import java.security.MessageDigest
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
 import javax.sql.DataSource
 import kotlin.random.Random
 
@@ -66,11 +63,6 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
                 this.createdAt = DateTime.now()
             }.let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
         }
-    }
-
-    private fun String.md5(): String {
-        val md = MessageDigest.getInstance("MD5")
-        return BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')
     }
 
     private fun checkTokenCreatedAtLastDay(tokenCreationInstant: Instant) : Boolean {
