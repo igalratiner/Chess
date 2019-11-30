@@ -4,7 +4,6 @@ import com.google.inject.Inject
 import dao.SessionDao
 import dao.UserCredentialsDao
 import exceptions.UserNotExistingException
-import md5
 import pojos.SessionToken
 
 class LoginService @Inject constructor(private val userCredentialsDao: UserCredentialsDao, private val sessionDao: SessionDao) {

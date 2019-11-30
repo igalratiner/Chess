@@ -4,12 +4,8 @@ import client.AccountsClient
 import com.google.inject.Inject
 import dao.UserCredentialsDao
 import exceptions.*
-import md5
 import pojos.SessionToken
 import requests.AccountRequest
-import requests.Credentials
-import responses.Session
-import java.time.Instant
 
 class SignupService @Inject constructor(private val loginService: LoginService, private val userCredentialsDao: UserCredentialsDao) {
     private val accountsClient = AccountsClient()
