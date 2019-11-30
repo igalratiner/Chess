@@ -13,7 +13,7 @@ import org.slf4j.event.Level
 import java.text.DateFormat
 
 fun Application.module() {
-    Guice.createInjector(AccountsModule(this), ExposedModule())
+    Guice.createInjector(AccountsModule(this), ExposedModule("accounts"))
 
     // Install Ktor features
     install(DefaultHeaders)

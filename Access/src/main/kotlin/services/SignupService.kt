@@ -11,7 +11,7 @@ class SignupService @Inject constructor(private val loginService: LoginService) 
     fun processSignup(credentials: Credentials) : Session {
         validateCredentialsValid(credentials)
         val encryptedPassword = encryptPassword(credentials.password)
-        return Session(SessionToken("", Instant.now()))
+        return Session(SessionToken(6, ""))
     }
 
     private fun validateCredentialsValid(credentials: Credentials) {

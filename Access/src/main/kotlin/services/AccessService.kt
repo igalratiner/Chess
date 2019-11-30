@@ -1,5 +1,5 @@
 package services
 
 class AccessService {
-    fun sayHello() : String = "hello from Server"
+    fun sayHello() : String = "hello from Accounts"
 }

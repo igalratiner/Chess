@@ -4,7 +4,7 @@ import java.sql.Connection
 import java.sql.SQLException
 
 class ChessDataSource {
-    private val config = HikariConfig("/datasource.properties")
+    private val config = HikariConfig("accountsdb.properties")
 
     private var ds: HikariDataSource? = null
 

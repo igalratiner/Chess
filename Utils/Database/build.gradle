@@ -4,9 +4,7 @@ sourceCompatibility = 1.8
 
 dependencies {
     // Exposed
-    compile("org.jetbrains.exposed:exposed-core:0.18.1")
-    compile("org.jetbrains.exposed:exposed-dao:0.18.1")
-    compile("org.jetbrains.exposed:exposed-jdbc:0.18.1")
+    compile("org.jetbrains.exposed:exposed:0.17.7")
     compile("mysql:mysql-connector-java:5.1.46")
 
     // Persistence

@@ -9,7 +9,7 @@ import pojo.Account
 class AccountsService @Inject constructor(val accountsDao: AccountsDao) {
     companion object : KLogging()
 
-    fun sayHello() : String = "hello from Server"
+    fun sayHello() : String = "hello from accounts"
 
     fun createAccount(accountRequest: AccountRequest): Account {
         val account = accountsDao.createAccount(accountRequest.username)
