@@ -12,8 +12,13 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import pojos.SessionToken
+import java.math.BigInteger
+import java.security.MessageDigest
 import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalUnit
 import javax.sql.DataSource
+import kotlin.random.Random
 
 class SessionDao @Inject constructor(dataSource: DataSource) {
     companion object : KLogging()
@@ -26,37 +31,65 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
         }
     }
 
-    fun getSession(userId: Int, token: String) : SessionToken? = transaction(db) {
-        SessionTokenEntry.find { (SessionTokens.userId eq userId) and (SessionTokens.token eq token)}
-    }.let {
-        return if (it.empty()) {
-            null
-        } else {
-            it.elementAt(0).let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
-        }
-    }
+//    fun getSession(userId: Int, token: String): SessionToken? = transaction(db) {
+//        SessionTokenEntry.find { (SessionTokens.userId eq userId) and (SessionTokens.token eq token) }
+//    }.let {
+//        return if (it.empty()) {
+//            null
+//        } else {
+//            it.elementAt(0).let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
+//        }
+//    }
+//
+//    fun createSession(userId: Int, token: String): SessionToken {
+//        return transaction(db) {
+//            SessionTokenEntry.new {
+//                this.userId = userId
+//                this.token = token
+//                this.createdAt = DateTime.now()
+//            }.let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
+//        }
+//    }
 
-    fun createSession(userId: Int, token: String) : SessionToken {
+    fun getUserSession(userId: Int): SessionToken {
         return transaction(db) {
-            SessionTokenEntry.new {
-                this.userId = this.userId
-                this.token = this.token
+            val sessionEntries = SessionTokenEntry.find { SessionTokens.userId eq userId }
+            if (!sessionEntries.empty() && checkTokenCreatedAtLastDay(Instant.ofEpochMilli(sessionEntries.elementAt(0).createdAt.millis))) {
+                return@transaction sessionEntries.elementAt(0).let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
+            }
+            if (!sessionEntries.empty()) {
+                sessionEntries.elementAt(0).delete()
+            }
+            return@transaction SessionTokenEntry.new {
+                this.userId = userId
+                this.token = Random.nextLong().toString().md5()
                 this.createdAt = DateTime.now()
             }.let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
         }
     }
-}
 
-object SessionTokens : IntIdTable() {
-    val userId = integer("user_id").uniqueIndex().references(UserCredentials.id)
-    val token = varchar("token", 50).uniqueIndex()
-    val createdAt = datetime("created_at")
-}
+    private fun String.md5(): String {
+        val md = MessageDigest.getInstance("MD5")
+        return BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')
+    }
 
-class SessionTokenEntry(id: EntityID<Int>) : Entity<Int>(id) {
-    companion object : EntityClass<Int, SessionTokenEntry>(SessionTokens)
+    private fun checkTokenCreatedAtLastDay(tokenCreationInstant: Instant) : Boolean {
+        val now = Instant.now()
+        val dayBefore = now.minus(24, ChronoUnit.HOURS)
+        return tokenCreationInstant.isAfter(dayBefore)
+    }
 
-    var userId by SessionTokens.userId
-    var token by SessionTokens.token
-    var createdAt by SessionTokens.createdAt
+    object SessionTokens : IntIdTable() {
+        val userId = integer("user_id").uniqueIndex().references(UserCredentials.id)
+        val token = varchar("token", 50).uniqueIndex()
+        val createdAt = datetime("created_at")
+    }
+
+    class SessionTokenEntry(id: EntityID<Int>) : Entity<Int>(id) {
+        companion object : EntityClass<Int, SessionTokenEntry>(SessionTokens)
+
+        var userId by SessionTokens.userId
+        var token by SessionTokens.token
+        var createdAt by SessionTokens.createdAt
+    }
 }

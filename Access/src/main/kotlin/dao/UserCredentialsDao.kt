@@ -10,17 +10,16 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
-import pojo.Account
 import javax.sql.DataSource
 
-class AccessDao @Inject constructor(dataSource: DataSource) {
+class UserCredentialsDao @Inject constructor(dataSource: DataSource) {
     companion object : KLogging()
 
     private val db: Database = Database.connect(dataSource)
 
     init {
         transaction {
-            SchemaUtils.create(UserCredentials, SessionTokens)
+            SchemaUtils.create(UserCredentials)
         }
     }
 
