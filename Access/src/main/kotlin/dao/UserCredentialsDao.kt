@@ -27,7 +27,7 @@ class UserCredentialsDao @Inject constructor(dataSource: DataSource) {
     fun getUserId(username: String, password: String): Int? {
         return transaction(db) {
             UserCredentialsEntry.find { (UserCredentials.username eq username) and (UserCredentials.password eq password.md5()) }
-                    .firstOrNull()?.id?.value
+                    .singleOrNull()?.id?.value
         }
     }
 

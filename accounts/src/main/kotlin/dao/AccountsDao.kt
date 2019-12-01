@@ -31,21 +31,14 @@ class AccountsDao @Inject constructor(dataSource: DataSource) {
 
     fun getAccountByUsername(username: String): Account? = transaction(db) {
         AccountEntry.find { Accounts.username eq username }
-                .let {
-                    if (it.empty()) {
-                        null
-                    } else {
-                        it.elementAt(0).let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
-                    }
-                }
+                .singleOrNull()?.let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
     }
 
     fun createAccount(username: String) : Account {
         return transaction(db) {
             AccountEntry.new {
                 this.username = username
-            }
-                    .let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
+            }.let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
         }
     }
 }
