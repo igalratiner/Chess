@@ -1,6 +1,3 @@
-package rest
-
-import ExposedModule
 import com.google.inject.Guice
 import di.AccessModule
 import io.ktor.application.Application

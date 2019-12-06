@@ -2,20 +2,23 @@ package services
 
 import client.AccountsClient
 import com.google.inject.Inject
-import dao.UserCredentialsDao
 import exceptions.*
 import pojos.SessionToken
 import requests.AccountRequest
 
-class SignupService @Inject constructor(private val loginService: LoginService, private val userCredentialsDao: UserCredentialsDao) {
+class SigningService @Inject constructor(private val accessService: AccessService) {
+
     private val accountsClient = AccountsClient()
 
     fun processSignup(username: String, password: String) : SessionToken {
         validateCredentialsValid(username, password)
-        val encryptedPassword = encryptPassword(password)
-        userCredentialsDao.createUserCredentials(username, encryptedPassword)
+        accessService.createUser(username, password)
         accountsClient.createAccount(AccountRequest(username))
-        return loginService.login(username, encryptedPassword)
+        return processSignup(username, password)
+    }
+
+    fun processLogin(username: String, password: String) : SessionToken{
+        return accessService.getSessionToken(username, password)
     }
 
     private fun validateCredentialsValid(username: String, password: String) {
@@ -24,14 +27,8 @@ class SignupService @Inject constructor(private val loginService: LoginService, 
         validateCredentialsNotUsed(username, password)
     }
 
-    private fun encryptPassword(password: String) : String {
-        return password
-    }
-
     private fun validateCredentialsNotUsed(username: String, password: String) {
-        if (userCredentialsDao.getUserId(username, password) != null) {
-            throw UserAlreadyExistsException()
-        }
+        accessService.validateCredentialsNotUsed(username, password)
     }
 
     private fun validateUsernameValid(username: String) {

@@ -28,26 +28,6 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
         }
     }
 
-//    fun getSession(userId: Int, token: String): SessionToken? = transaction(db) {
-//        SessionTokenEntry.find { (SessionTokens.userId eq userId) and (SessionTokens.token eq token) }
-//    }.let {
-//        return if (it.empty()) {
-//            null
-//        } else {
-//            it.elementAt(0).let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
-//        }
-//    }
-//
-//    fun createSession(userId: Int, token: String): SessionToken {
-//        return transaction(db) {
-//            SessionTokenEntry.new {
-//                this.userId = userId
-//                this.token = token
-//                this.createdAt = DateTime.now()
-//            }.let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
-//        }
-//    }
-
     fun getUserSession(userId: Int): SessionToken {
         return transaction(db) {
             val sessionEntries = SessionTokenEntry.find { SessionTokens.userId eq userId }
@@ -66,8 +46,7 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
     }
 
     private fun checkTokenCreatedAtLastDay(tokenCreationInstant: Instant) : Boolean {
-        val now = Instant.now()
-        val dayBefore = now.minus(24, ChronoUnit.HOURS)
+        val dayBefore = Instant.now().minus(24, ChronoUnit.HOURS)
         return tokenCreationInstant.isAfter(dayBefore)
     }
 

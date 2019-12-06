@@ -15,36 +15,24 @@ import mu.KotlinLogging
 import requests.Credentials
 
 import services.AccessService
-import services.LoginService
-import services.SignupService
+import services.SigningService
 
 
-class AccessResource @Inject constructor(application: Application, accessService: AccessService, loginService: LoginService,
-                                         signupService: SignupService)  {
+class AccessResource @Inject constructor(application: Application, accessService: AccessService, signingService: SigningService)  {
     init {
         val logger = KotlinLogging.logger {}
         application.routing {
-            get("/hello") {
-                logger.info("Return back a message from Server: ${accessService.sayHello()}")
-                call.respond(Bla("Server", accessService.sayHello()))
-            }
-            post("/hello") {
-                val messageReceived: Bla = call.receive()
-                logger.info("A message from ${messageReceived.holder}: ${messageReceived.message}")
-                logger.info("Return back a message from Server: ${accessService.sayHello()}")
-                call.respond(Bla("Server", accessService.sayHello()))
-            }
             post(LOGIN_PATH) {
                 val credentials: Credentials = call.receive()
                 logger.info("credentials received for login $credentials")
-                val sessionToken = loginService.login(credentials.username, credentials.password)
+                val sessionToken = signingService.processLogin(credentials.username, credentials.password)
                 logger.info("sessionToken for login $sessionToken")
                 call.respond(sessionToken)
             }
             post(SIGNUP_PATH) {
                 val credentials: Credentials = call.receive()
                 logger.info("credentials received for signup $credentials")
-                val sessionToken = signupService.processSignup(credentials.username, credentials.password)
+                val sessionToken = signingService.processSignup(credentials.username, credentials.password)
                 logger.info("sessionToken for signup $sessionToken")
                 call.respond(sessionToken)
             }
