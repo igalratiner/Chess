@@ -2,13 +2,18 @@ rootProject.name = 'Chess'
 include 'Computer'
 include 'Server'
 include 'Engine'
+include 'Access'
+include 'accounts'
+include 'player'
 
 rootProject.children.each {
     subproject -> subproject.buildFileName = "${subproject.name}.gradle"
 }
 include ':Server:ServerClient'
 include ':Utils:HttpClient'
-//findProject(':Utils:HttpClient')?.buildFileName = 'HttpClient'
 include ':Utils:JsonParser'
 include ':Utils:Database'
+include ':Access:client'
+include ':accounts:client'
+include ':Utils:crypto'
 

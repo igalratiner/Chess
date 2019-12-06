@@ -22,8 +22,24 @@ services:
     ports:
       - "5114:5000"
 
+  access:
+    build:
+      context: .
+      dockerfile: ./Access/Dockerfile
+    ports:
+      - "5115:5000"
+
+  accounts:
+    build:
+      context: .
+      dockerfile: ./accounts/Dockerfile
+    ports:
+      - "5116:5000"
+
   chess-db:
-    image: mysql:5.7
+    build:
+      context: .
+      dockerfile: ./mysql/Dockerfile
     restart: always
     environment:
       MYSQL_DATABASE: 'db'

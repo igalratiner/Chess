@@ -3,7 +3,7 @@ package di
 import com.google.inject.AbstractModule
 import io.ktor.application.Application
 import rest.ServerResource
-import service.ServerService
+import services.ServerService
 
 class ServerModule(private val application: Application) : AbstractModule() {
     override fun configure() {
