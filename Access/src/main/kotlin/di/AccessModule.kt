@@ -13,7 +13,6 @@ class AccessModule(private val application: Application) : AbstractModule() {
         bind(Application::class.java).toInstance(application)
         bind(AccessResource::class.java).asEagerSingleton()
         bind(AccessService::class.java).asEagerSingleton()
-        bind(LoginService::class.java).asEagerSingleton()
         bind(SigningService::class.java).asEagerSingleton()
         bind(SessionDao::class.java).asEagerSingleton()
         bind(UserCredentialsDao::class.java).asEagerSingleton()

@@ -9,7 +9,6 @@ import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import pojos.SessionToken
@@ -43,14 +42,6 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
                 this.token = Random.nextLong().toString().md5()
                 this.createdAt = DateTime.now()
             }.let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
-        }
-    }
-
-    fun deleteOldUserSessions() {
-        val dayBefore = DateTime(Instant.now().minus(24, ChronoUnit.HOURS).toEpochMilli())
-//        SessionTokenEntry.find { SessionTokens.createdAt less dayBefore }.forEach { it.delete() }
-        transaction(db) {
-            SessionTokens.deleteWhere { SessionTokens.createdAt less dayBefore }
         }
     }
 
