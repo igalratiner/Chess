@@ -6,8 +6,7 @@ import dao.UserCredentialsDao
 import io.ktor.application.Application
 import rest.AccessResource
 import services.AccessService
-import services.LoginService
-import services.SignupService
+import services.SigningService
 
 class AccessModule(private val application: Application) : AbstractModule() {
     override fun configure() {
@@ -15,7 +14,7 @@ class AccessModule(private val application: Application) : AbstractModule() {
         bind(AccessResource::class.java).asEagerSingleton()
         bind(AccessService::class.java).asEagerSingleton()
         bind(LoginService::class.java).asEagerSingleton()
-        bind(SignupService::class.java).asEagerSingleton()
+        bind(SigningService::class.java).asEagerSingleton()
         bind(SessionDao::class.java).asEagerSingleton()
         bind(UserCredentialsDao::class.java).asEagerSingleton()
     }
