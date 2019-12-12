@@ -1,5 +1,6 @@
+import ExposedModule
 import com.google.inject.Guice
-import di.AccessModule
+import di.AccountsModule
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.features.CallLogging
@@ -10,7 +11,6 @@ import org.slf4j.event.Level
 import java.text.DateFormat
 
 fun Application.module() {
-    Guice.createInjector(AccessModule(this), ExposedModule("access"))
-
+    Guice.createInjector(AccountsModule(this), ExposedModule("accounts"))
     baseModule()
 }

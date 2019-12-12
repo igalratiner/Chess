@@ -1,4 +1,7 @@
 import com.google.gson.GsonBuilder
+import mu.KLogging
+import okhttp3.Headers
+import okhttp3.Headers.Companion.toHeaders
 import java.io.IOException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -32,11 +35,15 @@ class HttpClient(private val url: String = "https://localhost:5000") {
     }
 
     @Throws(IOException::class)
-    fun get(path: String): Response {
-        val request = Request.Builder()
+    fun get(path: String, headersMap : Map<String, String>? = null): Response {
+        val requestBuilder = Request.Builder()
                 .url(url + path)
                 .get()
-                .build()
+        val request : Request = if (headersMap == null) { requestBuilder.build() } else {
+            headersMap.forEach{ (header, value) -> requestBuilder.addHeader(header, value) }
+            requestBuilder.build()
+        }
+        KLogging().logger.info { "my requesrt: $request" }
         return client.newCall(request).execute()
     }
 }

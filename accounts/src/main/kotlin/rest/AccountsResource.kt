@@ -1,7 +1,7 @@
 package rest
 
 import client.AccountsClient.Companion.ACCOUNT_PATH
-import client.Bla
+import client.AccountsClient.Companion.USERNAME_PATH
 import com.google.inject.Inject
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -20,20 +20,15 @@ class AccountsResource @Inject constructor(application: Application, accountsSer
     init {
         val logger = KotlinLogging.logger {}
         application.routing {
-            get("/hello") {
-                logger.info("Return back a message from Server: ${accountsService.sayHello()}")
-                call.respond(Bla("Server", accountsService.sayHello()))
-            }
-            post("/hello") {
-                val messageReceived: Bla = call.receive()
-                logger.info("A message from ${messageReceived.holder}: ${messageReceived.message}")
-                logger.info("Return back a message from Server: ${accountsService.sayHello()}")
-                call.respond(Bla("Server", accountsService.sayHello()))
-            }
             post(ACCOUNT_PATH) {
                 val accountRequest: AccountRequest = call.receive()
                 logger.info("account request=$accountRequest was received")
                 call.respond(accountsService.createAccount(accountRequest))
+            }
+            get("$USERNAME_PATH/{username}") {
+                val username: String = call.parameters["username"] ?: throw RuntimeException("no valid username specified in path")
+                logger.info("account get request for username $username received")
+                call.respond(accountsService.getAccount(username))
             }
         }
     }

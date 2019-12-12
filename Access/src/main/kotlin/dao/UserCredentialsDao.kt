@@ -31,6 +31,12 @@ class UserCredentialsDao @Inject constructor(dataSource: DataSource) {
         }
     }
 
+    fun getUsername(userId: Int) : String {
+        return transaction(db) {
+            UserCredentialsEntry.findById(userId)!!.username
+        }
+    }
+
     fun createUserCredentials(username: String, password: String) : Int {
         return transaction(db) {
             UserCredentialsEntry.new {

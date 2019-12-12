@@ -3,31 +3,33 @@ package client
 
 import HttpClient
 import com.google.gson.GsonBuilder
-import pojos.SessionToken
-import requests.Credentials
+import pojo.Account
 import responses.Session
+import requests.Credentials
 
 
 class AccessClient(clientUrl: String  = "http://localhost:1551") {
     private val client = HttpClient(clientUrl)
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
-    fun sayHelloToMyself(greetings : Any) : Bla {
-        return gson.fromJson(client.post(HELLO_PATH, greetings).body?.string(), Bla::class.java)
+
+    fun login(loginCredentials: Credentials) : Session {
+        return gson.fromJson(client.post(LOGIN_PATH, loginCredentials).body?.string(), Session::class.java)
     }
 
-    fun login(loginCredentials: Credentials) : SessionToken {
-        return gson.fromJson(client.post(LOGIN_PATH, loginCredentials).body?.string(), SessionToken::class.java)
-    }
-
-    fun signup(signupCredentials: Credentials) : SessionToken {
+    fun signup(signupCredentials: Credentials) : Session {
         val response = client.post(SIGNUP_PATH, signupCredentials)
-        return gson.fromJson(response.body?.string(), SessionToken::class.java)
+        return gson.fromJson(response.body?.string(), Session::class.java)
+    }
+
+    fun getSessionAccount(sessionKey: String) : Account {
+        val response = client.get("$ACCOUNT_PATH/$sessionKey")
+        return gson.fromJson(response.body?.string(), Account::class.java)
     }
 
     companion object {
-        const val HELLO_PATH : String = "/hello"
         const val LOGIN_PATH : String = "/login"
         const val SIGNUP_PATH : String = "/signup"
+        const val ACCOUNT_PATH: String = "/session-account"
     }
 }

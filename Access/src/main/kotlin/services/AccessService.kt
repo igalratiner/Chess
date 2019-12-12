@@ -1,20 +1,24 @@
 package services
 
+import responses.Session
+import client.AccountsClient
 import com.google.inject.Inject
 import dao.SessionDao
 import dao.UserCredentialsDao
 import exceptions.UserAlreadyExistsException
 import exceptions.UserNotExistingException
 import md5
-import pojos.SessionToken
+import pojo.Account
 
-class AccessService @Inject constructor(private val userCredentialsDao: UserCredentialsDao, private val sessionDao : SessionDao) {
+class AccessService @Inject constructor(private val userCredentialsDao: UserCredentialsDao, 
+                                        private val sessionDao : SessionDao,
+                                        private val accountsClient: AccountsClient) {
 
-    fun getSessionToken(username: String, password: String) : SessionToken {
+    fun getSessionToken(username: String, password: String) : Session {
         val encryptedPassword = encryptPassword(password)
         val userId = userCredentialsDao.getUserId(username, encryptedPassword)
         if (userId != null) {
-            return sessionDao.getUserSession(userId)
+            return sessionDao.getSessionForUserId(userId)
         } else {
             throw UserNotExistingException()
         }
@@ -31,7 +35,13 @@ class AccessService @Inject constructor(private val userCredentialsDao: UserCred
             throw UserAlreadyExistsException()
         }
     }
-
+    
+    fun getAccountFromSessionToken(sessionToken: String) : Account {
+        val userId = sessionDao.getUserForSessionKey(sessionToken) ?: throw UserNotExistingException()
+        val username = userCredentialsDao.getUsername(userId)
+        return accountsClient.getAccount(username)
+    }
+    
     private fun encryptPassword(password: String) : String {
         return password.md5()
     }

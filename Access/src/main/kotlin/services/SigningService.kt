@@ -1,23 +1,23 @@
 package services
 
+import responses.Session
 import client.AccountsClient
 import com.google.inject.Inject
 import exceptions.*
-import pojos.SessionToken
 import requests.AccountRequest
 
 class SigningService @Inject constructor(private val accessService: AccessService) {
 
     private val accountsClient = AccountsClient()
 
-    fun processSignup(username: String, password: String) : SessionToken {
+    fun processSignup(username: String, password: String) : Session {
         validateCredentialsValid(username, password)
         accessService.createUser(username, password)
         accountsClient.createAccount(AccountRequest(username))
-        return processSignup(username, password)
+        return processLogin(username, password)
     }
 
-    fun processLogin(username: String, password: String) : SessionToken{
+    fun processLogin(username: String, password: String) : Session {
         return accessService.getSessionToken(username, password)
     }
 
