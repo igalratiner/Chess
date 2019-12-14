@@ -17,12 +17,10 @@ fun Application.authenticatedModule() {
             serializer = GsonSessionSerializer(Session::class.java)
         }
     }
+
     intercept(ApplicationCallPipeline.Call) {
-        val session: Session = call.sessions.get()
-                ?: throw RuntimeException("no valid session token specified in path")
-        application.log.info("SessionToken from GameMaster: $session")
+        val session: Session = call.sessions.get() ?: throw RuntimeException("no valid session token specified in path")
         val account = AccessClient().getSessionAccount(session.token)
-        application.log.info("account received in GameMaster: $account")
         call.attributes.put(accountAttributeKey, account)
     }
 
