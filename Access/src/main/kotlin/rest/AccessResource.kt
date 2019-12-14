@@ -23,9 +23,6 @@ class AccessResource @Inject constructor(application: Application, signingServic
     init {
         val logger = KotlinLogging.logger {}
         application.routing {
-            authenticate {
-
-            }
             post(LOGIN_PATH) {
                 val credentials: Credentials = call.receive()
                 logger.info("credentials received for login $credentials")

@@ -1,10 +1,12 @@
 package services
 
+import MD5_LENGTH
 import responses.Session
 import client.AccountsClient
 import com.google.inject.Inject
 import dao.SessionDao
 import dao.UserCredentialsDao
+import exceptions.InvalidSessionTokenException
 import exceptions.UserAlreadyExistsException
 import exceptions.UserNotExistingException
 import md5
@@ -37,6 +39,7 @@ class AccessService @Inject constructor(private val userCredentialsDao: UserCred
     }
     
     fun getAccountFromSessionToken(sessionToken: String) : Account {
+        validateSessionToken(sessionToken)
         val userId = sessionDao.getUserForSessionKey(sessionToken) ?: throw UserNotExistingException()
         val username = userCredentialsDao.getUsername(userId)
         return accountsClient.getAccount(username)
@@ -44,5 +47,11 @@ class AccessService @Inject constructor(private val userCredentialsDao: UserCred
     
     private fun encryptPassword(password: String) : String {
         return password.md5()
+    }
+
+    private fun validateSessionToken(sessionToken: String) {
+        if (sessionToken.length != MD5_LENGTH || !sessionToken.matches("""[a-zA-z0-9]*""".toRegex())) {
+            throw InvalidSessionTokenException()
+        }
     }
 }
