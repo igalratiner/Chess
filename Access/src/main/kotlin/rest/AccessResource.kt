@@ -6,7 +6,6 @@ import client.AccessClient.Companion.ACCOUNT_PATH
 import com.google.inject.Inject
 import io.ktor.application.Application
 import io.ktor.application.call
-import io.ktor.auth.authenticate
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.get
@@ -40,7 +39,8 @@ class AccessResource @Inject constructor(application: Application, signingServic
             get("$ACCOUNT_PATH/{session_token}") {
                 val sessionToken : String = call.parameters["session_token"] ?: throw RuntimeException("no valid session token specified in path")
                 logger.info("session token received for account retrieval $sessionToken")
-                call.respond(accessService.getAccountFromSessionToken(sessionToken))
+                val account = accessService.getAccountFromSessionToken(sessionToken)
+                call.respond(account)
             }
         }
     }

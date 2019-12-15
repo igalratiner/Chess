@@ -23,12 +23,16 @@ class AccountsResource @Inject constructor(application: Application, accountsSer
             post(ACCOUNT_PATH) {
                 val accountRequest: AccountRequest = call.receive()
                 logger.info("account request=$accountRequest was received")
-                call.respond(accountsService.createAccount(accountRequest))
+                val account = accountsService.createAccount(accountRequest)
+                logger.info("account=$account was created")
+                call.respond(account)
             }
             get("$USERNAME_PATH/{username}") {
                 val username: String = call.parameters["username"] ?: throw RuntimeException("no valid username specified in path")
                 logger.info("account get request for username $username received")
-                call.respond(accountsService.getAccount(username))
+                val account = accountsService.getAccount(username)
+                logger.info("account=$account from username=$username")
+                call.respond(account)
             }
         }
     }

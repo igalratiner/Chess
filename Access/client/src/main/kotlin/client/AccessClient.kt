@@ -22,8 +22,8 @@ class AccessClient(clientUrl: String  = "http://localhost:1551") {
         return gson.fromJson(response.body?.string(), Session::class.java)
     }
 
-    fun getSessionAccount(sessionKey: String) : Account {
-        val response = client.get("$ACCOUNT_PATH/$sessionKey")
+    fun getSessionAccount(sessionToken: String) : Account {
+        val response = client.get("$ACCOUNT_PATH/$sessionToken")
         return gson.fromJson(response.body?.string(), Account::class.java)
     }
 

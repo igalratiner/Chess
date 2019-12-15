@@ -19,11 +19,12 @@ fun Application.authenticatedModule() {
     }
 
     intercept(ApplicationCallPipeline.Call) {
-        val session: Session = call.sessions.get() ?: throw RuntimeException("no valid session token specified in path")
-        val account = AccessClient().getSessionAccount(session.token)
-        call.attributes.put(accountAttributeKey, account)
+        val session: Session? = call.sessions.get()
+        if (session != null) {
+            val account = AccessClient().getSessionAccount(session.token)
+            call.attributes.put(accountAttributeKey, account)
+        }
     }
-
 }
 
 val ApplicationCall.account get(): Account? {

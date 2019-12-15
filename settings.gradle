@@ -16,7 +16,7 @@ include ':Utils:JsonParser'
 include ':Utils:Database'
 include ':Access:client'
 include ':accounts:client'
-include ':Utils:crypto'
+include ':Utils:security'
 include ':game-master:client'
 include 'Utils:rest'
 

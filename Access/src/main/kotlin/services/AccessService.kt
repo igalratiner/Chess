@@ -1,6 +1,6 @@
 package services
 
-import MD5_LENGTH
+import crypto.MD5_LENGTH
 import responses.Session
 import client.AccountsClient
 import com.google.inject.Inject
@@ -9,8 +9,9 @@ import dao.UserCredentialsDao
 import exceptions.InvalidSessionTokenException
 import exceptions.UserAlreadyExistsException
 import exceptions.UserNotExistingException
-import md5
+import crypto.md5
 import pojo.Account
+import security.checkHash
 
 class AccessService @Inject constructor(private val userCredentialsDao: UserCredentialsDao, 
                                         private val sessionDao : SessionDao,
@@ -50,7 +51,7 @@ class AccessService @Inject constructor(private val userCredentialsDao: UserCred
     }
 
     private fun validateSessionToken(sessionToken: String) {
-        if (sessionToken.length != MD5_LENGTH || !sessionToken.matches("""[a-zA-z0-9]*""".toRegex())) {
+        if (!checkHash(sessionToken, MD5_LENGTH)) {
             throw InvalidSessionTokenException()
         }
     }

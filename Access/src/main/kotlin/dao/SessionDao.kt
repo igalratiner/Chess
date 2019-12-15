@@ -1,7 +1,7 @@
 package dao
 
 import com.google.inject.Inject
-import md5
+import crypto.md5
 import mu.KLogging
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass

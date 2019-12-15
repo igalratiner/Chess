@@ -5,6 +5,7 @@ import client.AccountsClient
 import com.google.inject.Inject
 import exceptions.*
 import requests.AccountRequest
+import security.checkOnlyAlphaNumericChars
 
 class SigningService @Inject constructor(private val accessService: AccessService) {
 
@@ -36,7 +37,7 @@ class SigningService @Inject constructor(private val accessService: AccessServic
             throw UsernameTooShortException()
         } else if (username.length > 15) {
             throw UsernameTooShortException()
-        } else if (!("""[a-zA-z0-9]*""".toRegex().matches(username))) {
+        } else if (!checkOnlyAlphaNumericChars(username)) {
             throw InvalidLiteralInUsernameException()
         }
     }
@@ -46,7 +47,7 @@ class SigningService @Inject constructor(private val accessService: AccessServic
             throw PasswordTooShortException()
         } else if (password.length > 15) {
             throw PasswordTooLongException()
-        } else if (!("""[a-zA-z0-9]*""".toRegex().matches(password))) {
+        } else if (!checkOnlyAlphaNumericChars(password)) {
             throw InvalidLiteralInPasswordException()
         }
     }
