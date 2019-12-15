@@ -6,6 +6,7 @@ dependencies {
     compile project(':Access:client')
     compile project(':accounts:client')
     compile project(':Utils:Database')
+    compile project(':Utils:rest')
 }
 
 jar {

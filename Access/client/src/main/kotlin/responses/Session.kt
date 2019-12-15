@@ -1,5 +1,5 @@
 package responses
 
-import pojos.SessionToken
+import java.time.Instant
 
-data class Session(val sessionToken: SessionToken)
+data class Session(val token: String, val createAt: Instant)

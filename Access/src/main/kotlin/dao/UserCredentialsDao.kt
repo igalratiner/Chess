@@ -1,7 +1,6 @@
 package dao
 
 import com.google.inject.Inject
-import md5
 import mu.KLogging
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
@@ -28,6 +27,12 @@ class UserCredentialsDao @Inject constructor(dataSource: DataSource) {
         return transaction(db) {
             UserCredentialsEntry.find { (UserCredentials.username eq username) and (UserCredentials.password eq password) }
                     .singleOrNull()?.id?.value
+        }
+    }
+
+    fun getUsername(userId: Int) : String {
+        return transaction(db) {
+            UserCredentialsEntry.findById(userId)!!.username
         }
     }
 

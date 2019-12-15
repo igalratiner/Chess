@@ -1,7 +1,7 @@
 package dao
 
 import com.google.inject.Inject
-import md5
+import crypto.md5
 import mu.KLogging
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
-import pojos.SessionToken
+import responses.Session
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
@@ -28,11 +28,11 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
         }
     }
 
-    fun getUserSession(userId: Int): SessionToken {
+    fun getSessionForUserId(userId: Int): Session {
         return transaction(db) {
             val sessionEntries = SessionTokenEntry.find { SessionTokens.userId eq userId }
             if (!sessionEntries.empty() && checkTokenCreatedAtLastDay(Instant.ofEpochMilli(sessionEntries.elementAt(0).createdAt.millis))) {
-                return@transaction sessionEntries.elementAt(0).let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
+                return@transaction sessionEntries.elementAt(0).let { sessionTokenEntry -> Session(sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
             }
             if (!sessionEntries.empty()) {
                 sessionEntries.elementAt(0).delete()
@@ -41,7 +41,13 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
                 this.userId = userId
                 this.token = Random.nextLong().toString().md5()
                 this.createdAt = DateTime.now()
-            }.let { sessionTokenEntry -> SessionToken(sessionTokenEntry.userId, sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
+            }.let { sessionTokenEntry -> Session(sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
+        }
+    }
+    
+    fun getUserForSessionKey(sessionToken: String) : Int? {
+        return transaction(db) {
+            SessionTokenEntry.find { SessionTokens.token eq sessionToken }.singleOrNull()?.userId
         }
     }
 

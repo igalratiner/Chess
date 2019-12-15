@@ -1,8 +1,8 @@
 import com.google.inject.Guice
-import di.AccessModule
+import di.AccountsModule
 import io.ktor.application.Application
 
 fun Application.module() {
-    Guice.createInjector(AccessModule(this), ExposedModule("access"))
+    Guice.createInjector(AccountsModule(this), ExposedModule("accounts"))
     baseModule()
 }

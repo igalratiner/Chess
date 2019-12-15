@@ -1,23 +1,24 @@
 package services
 
+import responses.Session
 import client.AccountsClient
 import com.google.inject.Inject
 import exceptions.*
-import pojos.SessionToken
 import requests.AccountRequest
+import security.checkOnlyAlphaNumericChars
 
 class SigningService @Inject constructor(private val accessService: AccessService) {
 
     private val accountsClient = AccountsClient()
 
-    fun processSignup(username: String, password: String) : SessionToken {
+    fun processSignup(username: String, password: String) : Session {
         validateCredentialsValid(username, password)
         accessService.createUser(username, password)
         accountsClient.createAccount(AccountRequest(username))
-        return processSignup(username, password)
+        return processLogin(username, password)
     }
 
-    fun processLogin(username: String, password: String) : SessionToken{
+    fun processLogin(username: String, password: String) : Session {
         return accessService.getSessionToken(username, password)
     }
 
@@ -36,7 +37,7 @@ class SigningService @Inject constructor(private val accessService: AccessServic
             throw UsernameTooShortException()
         } else if (username.length > 15) {
             throw UsernameTooShortException()
-        } else if (!("""[a-zA-z0-9]*""".toRegex().matches(username))) {
+        } else if (!checkOnlyAlphaNumericChars(username)) {
             throw InvalidLiteralInUsernameException()
         }
     }
@@ -46,7 +47,7 @@ class SigningService @Inject constructor(private val accessService: AccessServic
             throw PasswordTooShortException()
         } else if (password.length > 15) {
             throw PasswordTooLongException()
-        } else if (!("""[a-zA-z0-9]*""".toRegex().matches(password))) {
+        } else if (!checkOnlyAlphaNumericChars(password)) {
             throw InvalidLiteralInPasswordException()
         }
     }
