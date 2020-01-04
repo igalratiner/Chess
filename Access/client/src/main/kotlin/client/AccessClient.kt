@@ -1,7 +1,6 @@
 package client
 
 
-import HttpClient
 import com.google.gson.GsonBuilder
 import pojo.Account
 import responses.Session

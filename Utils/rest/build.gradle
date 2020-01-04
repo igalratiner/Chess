@@ -9,7 +9,7 @@ repositories {
 
 
 dependencies {
-    compile project(':Access:client')
+    compile project(':access:client')
 
     // Ktor
     compile "io.ktor:ktor-server-netty:$ktor_version"

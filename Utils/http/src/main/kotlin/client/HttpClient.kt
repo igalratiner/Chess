@@ -1,7 +1,7 @@
+package client
+
 import com.google.gson.GsonBuilder
 import mu.KLogging
-import okhttp3.Headers
-import okhttp3.Headers.Companion.toHeaders
 import java.io.IOException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient

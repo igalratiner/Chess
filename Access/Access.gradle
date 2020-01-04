@@ -3,11 +3,11 @@ version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
 dependencies {
-    compile project(':Access:client')
+    compile project(':access:client')
     compile project(':accounts:client')
-    compile project(':Utils:Database')
-    compile project(':Utils:security')
-    compile project(':Utils:rest')
+    compile project(':utils:database')
+    compile project(':utils:security')
+    compile project(':utils:rest')
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
