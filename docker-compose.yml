@@ -43,7 +43,7 @@ services:
     ports:
       - "5117:5000"
 
-  chess-db:
+  shared-editor-db:
     build:
       context: .
       dockerfile: ./mysql/Dockerfile
