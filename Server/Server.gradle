@@ -4,7 +4,7 @@ sourceCompatibility = 1.8
 
 dependencies {
     compile project(':Server:ServerClient')
-    compile project(':Access:client')
+    compile project(':access:client')
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

@@ -11,7 +11,7 @@ rootProject.children.each {
     subproject -> subproject.buildFileName = "${subproject.name}.gradle"
 }
 include ':Server:ServerClient'
-include ':utils:client'
+include ':utils:http'
 include ':utils:json'
 include ':utils:database'
 include ':access:client'
