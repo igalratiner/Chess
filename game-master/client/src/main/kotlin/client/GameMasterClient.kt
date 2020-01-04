@@ -1,9 +1,6 @@
 package client
 
-
-import HttpClient
 import com.google.gson.GsonBuilder
-
 
 class GameMasterClient(clientUrl: String  = "http://localhost:1571") {
     private val client = HttpClient(clientUrl)

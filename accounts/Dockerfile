@@ -6,4 +6,4 @@ RUN gradle build
 FROM openjdk:8-jre-slim
 
 COPY --from=build /home/gradle/src/accounts/build/libs/*.jar /app/accounts.jar
-ENTRYPOINT java -jar /app/accounts.jar chess-db:5113
+ENTRYPOINT java -jar /app/accounts.jar shared-editor-db:5113

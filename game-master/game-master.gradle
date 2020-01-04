@@ -3,9 +3,9 @@ version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
 dependencies {
-    compile project(':Access:client')
+    compile project(':access:client')
     compile project(':accounts:client')
-    compile project(':Utils:rest')
+    compile project(':utils:rest')
 }
 
 jar {
