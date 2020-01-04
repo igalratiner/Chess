@@ -1,0 +1,15 @@
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // OkHttp
+    compile "com.squareup.okhttp3:okhttp:4.2.1"
+    testCompile "com.squareup.okhttp3:mockwebserver:4.2.1"
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
