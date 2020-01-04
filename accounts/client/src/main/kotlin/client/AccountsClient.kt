@@ -1,7 +1,5 @@
 package client
 
-
-import HttpClient
 import com.google.gson.GsonBuilder
 import requests.AccountRequest
 import pojo.Account

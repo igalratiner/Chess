@@ -1,9 +1,6 @@
 package client
 
-
-import HttpClient
 import com.google.gson.GsonBuilder
-
 
 class ServerClient(clientUrl: String  = "http://localhost:1517") {
     private val client = HttpClient(clientUrl)
