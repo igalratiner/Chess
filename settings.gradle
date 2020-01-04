@@ -1,4 +1,4 @@
-rootProject.name = 'Chess'
+rootProject.name = 'SharedEditor'
 include 'Computer'
 include 'Server'
 include 'Engine'
