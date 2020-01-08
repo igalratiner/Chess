@@ -6,10 +6,8 @@ include 'access'
 include 'accounts'
 include 'player'
 include 'game-master'
+include 'texts'
 
-rootProject.children.each {
-    subproject -> subproject.buildFileName = "${subproject.name}.gradle"
-}
 include ':Server:ServerClient'
 include ':utils:http'
 include ':utils:json'
@@ -19,4 +17,10 @@ include ':accounts:client'
 include ':utils:security'
 include ':game-master:client'
 include ':utils:rest'
+include ':texts:client'
+
+rootProject.children.each {
+    subproject -> subproject.buildFileName = "${subproject.name}.gradle"
+}
+include 'client'
 

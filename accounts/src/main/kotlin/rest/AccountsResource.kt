@@ -10,6 +10,7 @@ import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
+import mu.KLogging
 import mu.KotlinLogging
 import requests.AccountRequest
 
@@ -17,8 +18,9 @@ import services.AccountsService
 
 
 class AccountsResource @Inject constructor(application: Application, accountsService: AccountsService)  {
+    companion object : KLogging()
+
     init {
-        val logger = KotlinLogging.logger {}
         application.routing {
             post(ACCOUNT_PATH) {
                 val accountRequest: AccountRequest = call.receive()

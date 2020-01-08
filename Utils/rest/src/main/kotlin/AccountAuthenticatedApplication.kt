@@ -9,9 +9,9 @@ import responses.Session
 
 
 private val accountAttributeKey: AttributeKey<Account> = AttributeKey("account")
+private val accessClient = AccessClient()
 
-fun Application.authenticatedModule() {
-    baseModule()
+fun Application.accountAuthenticatedModule() {
     install(Sessions) {
         header<Session>("SESSION_TOKEN") {
             serializer = GsonSessionSerializer(Session::class.java)
@@ -21,7 +21,7 @@ fun Application.authenticatedModule() {
     intercept(ApplicationCallPipeline.Call) {
         val session: Session? = call.sessions.get()
         if (session != null) {
-            val account = AccessClient().getSessionAccount(session.token)
+            val account = accessClient.getSessionAccount(session.token)
             call.attributes.put(accountAttributeKey, account)
         }
     }

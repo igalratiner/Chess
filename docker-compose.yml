@@ -43,6 +43,13 @@ services:
     ports:
       - "5117:5000"
 
+  texts:
+    build:
+      context: .
+      dockerfile: ./game-master/Dockerfile
+    ports:
+      - "5118:5000"
+
   shared-editor-db:
     build:
       context: .
