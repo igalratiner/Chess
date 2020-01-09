@@ -17,7 +17,6 @@ fun Application.accountAuthenticatedModule() {
             serializer = GsonSessionSerializer(Session::class.java)
         }
     }
-
     intercept(ApplicationCallPipeline.Call) {
         val session: Session? = call.sessions.get()
         if (session != null) {

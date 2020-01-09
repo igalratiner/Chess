@@ -1,7 +1,7 @@
 import com.auth0.jwt.*
 import com.auth0.jwt.algorithms.*
 import pojo.TextDetails
-import pojo.TextPermission
+import pojo.TextRole
 import java.util.*
 
 object TextJwtConfig {
@@ -19,11 +19,11 @@ object TextJwtConfig {
     /**
      * Produce a token for this combination of User and Account
      */
-    fun makeToken(textDetails: TextDetails, textPermission: TextPermission): String = JWT.create()
+    fun makeToken(textDetails: TextDetails, textRole: TextRole): String = JWT.create()
             .withSubject("Authentication")
             .withIssuer(issuer)
             .withClaim("textId", textDetails.id)
-            .withClaim("textPermission", textPermission.name)
+            .withClaim("textPermission", textRole.name)
             .withExpiresAt(getExpiration())
             .sign(algorithm)
 

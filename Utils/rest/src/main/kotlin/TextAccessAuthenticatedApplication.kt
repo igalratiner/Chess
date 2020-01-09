@@ -1,3 +1,4 @@
+import aurthorization.RoleAuthorization
 import client.TextsClient
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -7,7 +8,7 @@ import io.ktor.auth.Principal
 import io.ktor.auth.authentication
 import io.ktor.auth.jwt.jwt
 import pojo.TextDetails
-import pojo.TextPermission
+import pojo.TextRole
 
 private val textsClient = TextsClient()
 
@@ -20,14 +21,15 @@ fun Application.textAccessAuthenticatedModule() {
             verifier(TextJwtConfig.verifier)
             realm = "ktor.io"
             validate {
-                val textDetails  = it.payload.getClaim("textId").asLong()?.let(textsClient::getTextDetails)
-                val textPermission = it.payload.getClaim("textPermission").asString()!!.let(TextPermission::valueOf)
-                if (textDetails != null) {
-                    TextPrincipal(textDetails, textPermission)
-                } else {
-                    null
-                }
+                val textDetails = it.payload.getClaim("textId").asLong().let(textsClient::getTextDetails)
+                val textRole = it.payload.getClaim("textPermission").asString()!!.let(TextRole::valueOf)
+                TextPrincipal(textDetails, textRole)
             }
+        }
+    }
+    install(RoleAuthorization) {
+        validate { allowedRoles ->
+            allowedRoles.contains(textRequest!!.textRole)
         }
     }
 }
@@ -35,4 +37,4 @@ fun Application.textAccessAuthenticatedModule() {
 val ApplicationCall.textRequest get() = authentication.principal<TextPrincipal>()
 
 
-data class TextPrincipal(val textDetails: TextDetails, val textPermission: TextPermission): Principal
+data class TextPrincipal(val textDetails: TextDetails, val textRole: TextRole): Principal

@@ -11,6 +11,7 @@ import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
+import mu.KLogging
 import mu.KotlinLogging
 import requests.Credentials
 import services.AccessService
@@ -18,9 +19,10 @@ import services.AccessService
 import services.SigningService
 
 
-class AccessResource @Inject constructor(application: Application, signingService: SigningService, accessService: AccessService)  {
+class AccessResource @Inject constructor(application: Application, signingService: SigningService, accessService: AccessService) {
+    companion object : KLogging()
+
     init {
-        val logger = KotlinLogging.logger {}
         application.routing {
             post(LOGIN_PATH) {
                 val credentials: Credentials = call.receive()

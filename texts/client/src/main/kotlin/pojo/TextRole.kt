@@ -1,5 +1,5 @@
 package pojo
 
-enum class TextPermission {
+enum class TextRole {
     OWNER, EDITOR, READER
 }
