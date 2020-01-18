@@ -2,8 +2,11 @@ package rest
 
 import TEXT_ACCESS_AUTH
 import TextPrincipal
+import account
 import aurthorization.rolesAllowed
+import client.TextsClient.Companion.TEXTS
 import client.TextsClient.Companion.TEXT_PATH
+import client.TextsClient.Companion.TEXT_PROVISION
 import com.google.inject.Inject
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -24,9 +27,27 @@ class TextsResource @Inject constructor(application: Application, textsService: 
 
     init {
         application.routing {
+            route(TEXTS) {
+                get("/account/{accountId}") {
+                    // get list of textHash->permission of account
+                }
+            }
+            route(TEXT_PROVISION) {
+                get {
+                    // returns a TextProvision containing jwt role + text hash
+                }
+            }
             route(TEXT_PATH) {
                 post {
                     textsService.createText()
+                    // create an entry in table texts: id, table given name(from body), text hash (generated unique)
+                    // insert to textHash+accounts->OWNER role (textHash+account unique key)
+                    // return pojo representing textHash + given name
+                }
+                get("/text-authentication") {
+                    call.account != null
+                    // check account is mapped to text permitted accounts
+                    // grant new jwt token
                 }
                 route("/{$TEXT_HASH}") {
                     authenticate(TEXT_ACCESS_AUTH) {
@@ -38,11 +59,22 @@ class TextsResource @Inject constructor(application: Application, textsService: 
 
                         // roles allowed Owner
                         rolesAllowed(OWNER) {
-                            post("/share") {
+                            post("/share-link") {
                                 textsService.shareText()
+                                // payload contains the type of permission granted with textHash
+                                // creates (if not existing) and sends back a TextProvision mapped to the file hash and permission
+                            }
+                            post("/share-account/{username}") {
+                                textsService.shareText()
+                                // payload contains the type of permission granted with link
+                                // adds textHash to account:texts mapping
+                                // creates (if not existing) and sends back a TextProvision mapped to the file hash and permission
                             }
                             delete {
                                 textsService.deleteText()
+                                // get all accounts mapped to textHash
+                                // go to textHash+accounts->permission an delete all entries of textHash
+                                // go to texts and delete textHash
                             }
                         }
 
@@ -50,13 +82,14 @@ class TextsResource @Inject constructor(application: Application, textsService: 
                         rolesAllowed(OWNER, EDITOR) {
                             put {
                                 textsService.updateText()
+                                // update text
                             }
                         }
 
                         // roles allowed Owner + Editor + Reader
                         rolesAllowed(OWNER, EDITOR, READER) {
                             get {
-
+                                // get text
                             }
                         }
                     }
