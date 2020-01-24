@@ -22,7 +22,7 @@ object TextJwtConfig {
     fun makeToken(textDetails: TextDetails, textRole: TextRole): String = JWT.create()
             .withSubject("Authentication")
             .withIssuer(issuer)
-            .withClaim("textId", textDetails.id)
+            .withClaim("textHash", textDetails.hash)
             .withClaim("textPermission", textRole.name)
             .withExpiresAt(getExpiration())
             .sign(algorithm)

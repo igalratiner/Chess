@@ -11,7 +11,6 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import pojo.TextRole
@@ -30,20 +29,20 @@ class TextRoleProvisionDao @Inject constructor(dataSource: DataSource) {
         }
     }
 
-    fun getTextAccess(textProvisionHash: String): List<TextAccess> {
+    fun getTextAccess(textProvisionHash: String): TextAccess? {
         return transaction(db) {
             TextAccountRoleEntry.find{TextRoleProvision.textProvisionHash eq textProvisionHash}
-                    .map { TextAccess(it.textHash, textRole = it.role) }
+                    .singleOrNull()?.let { TextAccess(it.textHash, textRole = it.role) }
         }
     }
 
-    fun addProvisionToText(textHash: String, role: TextRole) {
-        transaction(db) {
+    fun addProvisionToText(textHash: String, role: TextRole): String {
+        return transaction(db) {
             TextRoleProvisionEntry.new{
                 this.textHash = textHash
                 this.role = role
                 this.textProvisionHash = createUniqueTextProvisionHash()
-            }
+            }.textProvisionHash
         }
     }
 
@@ -58,7 +57,7 @@ class TextRoleProvisionDao @Inject constructor(dataSource: DataSource) {
         }
     }
 
-    private fun deleteTextProvisions(textHash: String) {
+    fun deleteTextProvisions(textHash: String) {
 //        transaction(db) {
 //            TextAccountRoleEntry.find { TextRoleProvision.textHash eq textHash }
 //                    .forEach(TextAccountRoleEntry::delete)

@@ -8,6 +8,7 @@ import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import pojo.Account
 import pojo.TextRole
 import javax.sql.DataSource
 
@@ -34,7 +35,17 @@ class TextAccountRoleDao @Inject constructor(dataSource: DataSource) {
         }
     }
 
-    fun updateTextToAccount(textHash: String, accountId: Int, role: TextRole) {
+    fun getTextRole(accountId: Int, textHash: String): TextRole? {
+        return transaction(db) {
+            return@transaction TextAccountRoleEntry.find{ (TextAccountRole.accountId eq accountId) and (TextAccountRole.textHash eq textHash)}.singleOrNull()?.role
+        }
+    }
+
+    fun createTextToAccount(textHash: String, accountId: Int) {
+        updateTextToAccount(textHash, TextRole.OWNER, accountId)
+    }
+
+    fun updateTextToAccount(textHash: String, role: TextRole, accountId: Int) {
         transaction(db) {
             val textAccountRoleEntry = TextAccountRoleEntry.find{(TextAccountRole.accountId eq accountId) and (TextAccountRole.textHash eq textHash)}
                     .singleOrNull()

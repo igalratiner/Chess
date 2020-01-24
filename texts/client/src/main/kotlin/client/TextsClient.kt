@@ -11,7 +11,7 @@ class TextsClient {
         const val TEXTS = "/texts"
     }
 
-    fun getTextDetails(textId: Long) : TextDetails {
-        return TextDetails(textId,"d", "f")
+    fun getTextDetails(textHash: String) : TextDetails {
+        return TextDetails("d", "f")
     }
 }

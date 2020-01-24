@@ -12,66 +12,78 @@ import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.auth.principal
+import io.ktor.request.receive
+import io.ktor.response.respond
 import io.ktor.routing.*
+import io.ktor.util.KtorExperimentalAPI
 import mu.KLogging
-import pojo.TextRole.OWNER
-import pojo.TextRole.EDITOR
-import pojo.TextRole.READER
+import pojo.TextDetails
+import pojo.TextRole.*
 import service.TextsService
 
-class TextsResource @Inject constructor(application: Application, textsService: TextsService)  {
+@KtorExperimentalAPI
+class TextsResource @Inject constructor(application: Application, textsService: TextsService) {
 
     companion object : KLogging() {
         const val TEXT_HASH = "textHash"
+        const val TEXT_ROLE = " textRole"
     }
 
     init {
         application.routing {
-            route(TEXTS) {
-                get("/account/{accountId}") {
-                    // get list of textHash->permission of account
-                }
-            }
-            route(TEXT_PROVISION) {
+            route("/$TEXT_PROVISION/{$TEXT_PROVISION}") {
                 get {
                     // returns a TextProvision containing jwt role + text hash
+                    textsService.getTextAuthorization(call.parameters[TEXT_PROVISION]!!)
+                }
+            }
+            route(TEXTS) {
+                get("/account") {
+                    // get list of textHash
+                    textsService.getTexts(call.account!!.id)
                 }
             }
             route(TEXT_PATH) {
                 post {
-                    textsService.createText()
                     // create an entry in table texts: id, table given name(from body), text hash (generated unique)
                     // insert to textHash+accounts->OWNER role (textHash+account unique key)
                     // return pojo representing textHash + given name
+                    val textName: String = call.receive()
+                    val createdText: TextDetails = textsService.createText(textName, call.account!!.id)
+                    call.respond(createdText)
                 }
                 get("/text-authentication") {
-                    call.account != null
                     // check account is mapped to text permitted accounts
                     // grant new jwt token
+                    val textHash: String = call.receive()
+                    textsService.getTextAuthorization(call.account!!.id, textHash)
                 }
                 route("/{$TEXT_HASH}") {
                     authenticate(TEXT_ACCESS_AUTH) {
                         handle {
                             val jwtTextHash = this.context.principal<TextPrincipal>()!!.textDetails.hash
-                            val routedTextHash : String = call.parameters[TEXT_HASH] ?: throw RuntimeException("no valid text hash")
+                            val routedTextHash: String = call.parameters[TEXT_HASH]
+                                    ?: throw RuntimeException("no valid text hash")
                             assert(jwtTextHash == routedTextHash)
                         }
 
                         // roles allowed Owner
                         rolesAllowed(OWNER) {
-                            post("/share-link") {
-                                textsService.shareText()
+                            get("/share-link/{textRole}") {
+                                val textProvision = textsService.shareText(call.parameters[TEXT_HASH]!!, valueOf(call.parameters[TEXT_ROLE]!!))
+                                call.respond(textProvision)
                                 // payload contains the type of permission granted with textHash
                                 // creates (if not existing) and sends back a TextProvision mapped to the file hash and permission
                             }
-                            post("/share-account/{username}") {
-                                textsService.shareText()
-                                // payload contains the type of permission granted with link
+                            post("/share-text-to-account/{textRole}") {
+                                val usernameToShareWith: String = call.receive()
+                                textsService.shareTextWithAccount(call.parameters[TEXT_HASH]!!, valueOf(call.parameters[TEXT_ROLE]!!), usernameToShareWith)
+                                // payload contains the type of permission granted with textHash
                                 // adds textHash to account:texts mapping
                                 // creates (if not existing) and sends back a TextProvision mapped to the file hash and permission
                             }
                             delete {
-                                textsService.deleteText()
+                                textsService.deleteText(call.parameters[TEXT_HASH]!!)
                                 // get all accounts mapped to textHash
                                 // go to textHash+accounts->permission an delete all entries of textHash
                                 // go to texts and delete textHash

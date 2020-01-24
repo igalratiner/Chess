@@ -21,7 +21,7 @@ fun Application.textAccessAuthenticatedModule() {
             verifier(TextJwtConfig.verifier)
             realm = "ktor.io"
             validate {
-                val textDetails = it.payload.getClaim("textId").asLong().let(textsClient::getTextDetails)
+                val textDetails = it.payload.getClaim("textHash").asString().let(textsClient::getTextDetails)
                 val textRole = it.payload.getClaim("textPermission").asString()!!.let(TextRole::valueOf)
                 TextPrincipal(textDetails, textRole)
             }

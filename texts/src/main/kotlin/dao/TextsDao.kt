@@ -10,6 +10,7 @@ import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import pojo.TextDetails
 import javax.sql.DataSource
 import kotlin.random.Random
 
@@ -24,24 +25,18 @@ class TextsDao @Inject constructor(dataSource: DataSource) {
         }
     }
 
-    fun getTextName(textHash: String): String? {
+    fun getText(textHash: String): TextDetails? {
         return transaction(db) {
-            TextsEntry.find { Texts.textHash eq textHash }.singleOrNull()?.textName
+            TextsEntry.find { Texts.textHash eq textHash }.singleOrNull()?.let { TextDetails(it.textHash, it.textName) }
         }
     }
 
-    fun getTextHash(textName: String): String? {
+    fun createText(textName: String): TextDetails {
         return transaction(db) {
-            TextsEntry.find { Texts.textName eq textName }.singleOrNull()?.textHash
-        }
-    }
-
-    fun createText(textName: String) {
-        transaction(db) {
-            TextsEntry.new {
+            return@transaction TextsEntry.new {
                 this.textName = textName
                 this.textHash = createUniqueTextHash()
-            }
+            }.let { TextDetails(it.textHash, it.textName) }
         }
     }
 

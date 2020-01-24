@@ -3,7 +3,6 @@ version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
 dependencies {
-    compile project(':Server:ServerClient')
     compile project(':access:client')
     compile project(':game-master:client')
 
