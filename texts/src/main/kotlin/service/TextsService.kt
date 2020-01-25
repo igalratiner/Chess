@@ -7,12 +7,15 @@ import dao.TextRoleProvisionDao
 import dao.TextsDao
 import io.ktor.features.NotFoundException
 import io.ktor.util.KtorExperimentalAPI
+import mu.KLogging
 import pojo.TextDetails
 import pojo.TextRole
 
 class TextsService @Inject constructor(private val textsDao: TextsDao,
                                        private val textAccountRoleDao: TextAccountRoleDao,
                                        private val textRoleProvisionDao: TextRoleProvisionDao) {
+    companion object : KLogging()
+
     private val accountsClient = AccountsClient()
 
     fun createText(textName: String, accountId: Int): TextDetails {

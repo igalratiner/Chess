@@ -9,6 +9,7 @@ import io.ktor.auth.Authentication
 import io.ktor.auth.Principal
 import io.ktor.auth.authentication
 import io.ktor.auth.jwt.jwt
+import okhttp3.internal.http2.Http2Reader.Companion.logger
 import pojo.TextDetails
 import pojo.TextRole
 
@@ -31,6 +32,8 @@ fun Application.textAccessAuthenticatedModule() {
     }
     install(RoleAuthorization) {
         validate { allowedRoles ->
+            logger.info(textRequest!!.textRole.name)
+            logger.info(textRequest!!.textDetails.toString())
             allowedRoles.contains(textRequest!!.textRole)
         }
     }

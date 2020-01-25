@@ -31,7 +31,9 @@ val ApplicationCall.account get(): Account? {
 }
 
 class GsonSessionSerializer(
-        private val type: java.lang.reflect.Type, private val gson: Gson = Gson(), configure: Gson.() -> Unit = {}
+        private val type: java.lang.reflect.Type,
+        private val gson: Gson = Gson(),
+        configure: Gson.() -> Unit = {}
 ) : SessionSerializer {
     init {
         configure(gson)

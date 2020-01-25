@@ -27,7 +27,7 @@ class RoleAuthorization internal constructor(config: Configuration) {
     }
 
     fun interceptPipeline(pipeline: ApplicationCallPipeline, roles: Set<TextRole>) {
-        pipeline.insertPhaseAfter(ApplicationCallPipeline.Features, authorizationPhase)
+        pipeline.addPhase(authorizationPhase)
         pipeline.intercept(authorizationPhase) {
             val call = call
             config.provider.authorizationFunction(call, roles)
@@ -43,8 +43,9 @@ class RoleAuthorization internal constructor(config: Configuration) {
                 pipeline: ApplicationCallPipeline,
                 configure: RoleBasedAuthorizer.() -> Unit
         ): RoleAuthorization {
-            val configuration = RoleBasedAuthorizer().apply(configure)
-
+            val roleBasedAuthorizer = RoleBasedAuthorizer()
+            roleBasedAuthorizer.validate { configure }
+            val configuration = Configuration(roleBasedAuthorizer)
             return RoleAuthorization(configuration)
         }
     }

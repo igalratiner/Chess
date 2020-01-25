@@ -7,6 +7,7 @@ import aurthorization.rolesAllowed
 import client.TextsClient.Companion.ACCOUNT
 import client.TextsClient.Companion.TEXTS
 import client.TextsClient.Companion.TEXT_AUTH_TOKEN
+import client.TextsClient.Companion.TEXT_DETAILS
 import client.TextsClient.Companion.TEXT_PATH
 import client.TextsClient.Companion.TEXT_PROVISION
 import com.google.inject.Inject
@@ -14,6 +15,7 @@ import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.auth.principal
+import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.*
@@ -33,10 +35,10 @@ class TextsResource @Inject constructor(application: Application, textsService: 
 
     init {
         application.routing {
-            route("$TEXT_PROVISION/{$TEXT_PROVISION}") {
+            route("$TEXT_PROVISION/{text-provision}") {
                 get {
                     // returns a TextProvision containing jwt role + text hash
-                    val textAuthorizationToken = textsService.getTextAuthorization(call.parameters[TEXT_PROVISION]!!)
+                    val textAuthorizationToken = textsService.getTextAuthorization(call.parameters["text-provision"]!!)
                     call.respond(textAuthorizationToken)
                 }
             }
@@ -57,13 +59,13 @@ class TextsResource @Inject constructor(application: Application, textsService: 
                     call.respond(createdText)
                 }
                 route("/{$TEXT_HASH}") {
-                    get {
-                        textsService.getTextDetails(call.parameters[TEXT_HASH]!!)
+                    get(TEXT_DETAILS) {
+                        call.respond(textsService.getTextDetails(call.parameters[TEXT_HASH]!!))
                     }
                     get(TEXT_AUTH_TOKEN) {
                         // check account is mapped to text permitted accounts
                         // grant new jwt token
-                        textsService.getTextAuthorization(call.account!!.id, call.parameters[TEXT_HASH]!!)
+                        call.respond(textsService.getTextAuthorization(call.account!!.id, call.parameters[TEXT_HASH]!!))
                     }
                     authenticate(TEXT_ACCESS_AUTH) {
                         handle {
@@ -75,18 +77,19 @@ class TextsResource @Inject constructor(application: Application, textsService: 
 
                         // roles allowed Owner
                         rolesAllowed(OWNER) {
-                            get("/share-link/{textRole}") {
+                            get("/share-link/{$TEXT_ROLE}") {
                                 val textProvision = textsService.shareText(call.parameters[TEXT_HASH]!!, valueOf(call.parameters[TEXT_ROLE]!!))
                                 call.respond(textProvision)
                                 // payload contains the type of permission granted with textHash
                                 // creates (if not existing) and sends back a TextProvision mapped to the file hash and permission
                             }
-                            post("/share-text-to-account/{textRole}") {
-                                val usernameToShareWith: String = call.receive()
-                                textsService.shareTextWithAccount(call.parameters[TEXT_HASH]!!, valueOf(call.parameters[TEXT_ROLE]!!), usernameToShareWith)
+                            post("/share-text-to-account/{$TEXT_ROLE}") {
                                 // payload contains the type of permission granted with textHash
                                 // adds textHash to account:texts mapping
                                 // creates (if not existing) and sends back a TextProvision mapped to the file hash and permission
+                                val usernameToShareWith: String = call.receive()
+                                textsService.shareTextWithAccount(call.parameters[TEXT_HASH]!!, valueOf(call.parameters[TEXT_ROLE]!!), usernameToShareWith)
+                                call.respond(HttpStatusCode.Accepted)
                             }
                             delete {
                                 textsService.deleteText(call.parameters[TEXT_HASH]!!)

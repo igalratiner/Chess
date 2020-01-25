@@ -14,10 +14,11 @@ class TextsClient(clientUrl: String  = "http://localhost:1581") {
         const val TEXTS = "/texts"
         const val ACCOUNT = "/account"
         const val TEXT_AUTH_TOKEN = "/text-auth"
+        const val TEXT_DETAILS = "/details"
     }
 
     fun getTextDetails(textHash: String): TextDetails {
-        return gson.fromJson(client.get("$TEXT_PATH/$textHash").body?.string(), TextDetails::class.java)
+        return gson.fromJson(client.get("$TEXT_PATH/$textHash$TEXT_DETAILS").body?.string(), TextDetails::class.java)
     }
 
 //    fun getTextAuthenticationForProvision(textProvision: String): String {

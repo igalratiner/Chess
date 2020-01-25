@@ -33,7 +33,7 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
             val sessionEntry = SessionEntry.find { Sessions.userId eq userId }.singleOrNull()
             if (sessionEntry != null) {
                 if (checkTokenCreatedAtLastDay(Instant.ofEpochMilli(sessionEntry.createdAt.millis))) {
-                    return@transaction Session(sessionEntry.token, Instant.ofEpochMilli(sessionEntry.createdAt.millis))
+                    return@transaction Session(sessionEntry.token, sessionEntry.createdAt.millis)
                 }  else {
                     sessionEntry.delete()
                 }
@@ -42,7 +42,7 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
                 this.userId = userId
                 this.token = getUniqueSessionToken()
                 this.createdAt = DateTime.now()
-            }.let { sessionTokenEntry -> Session(sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
+            }.let { sessionTokenEntry -> Session(sessionTokenEntry.token, sessionTokenEntry.createdAt.millis) }
         }
     }
     

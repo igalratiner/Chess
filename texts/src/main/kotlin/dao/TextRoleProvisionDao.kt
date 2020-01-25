@@ -13,6 +13,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
+import pojo.TextAccess
 import pojo.TextRole
 import java.time.Instant
 import javax.sql.DataSource
@@ -31,7 +32,7 @@ class TextRoleProvisionDao @Inject constructor(dataSource: DataSource) {
 
     fun getTextAccess(textProvisionHash: String): TextAccess? {
         return transaction(db) {
-            TextAccountRoleEntry.find{TextRoleProvision.textProvisionHash eq textProvisionHash}
+            TextRoleProvisionEntry.find{TextRoleProvision.textProvisionHash eq textProvisionHash}
                     .singleOrNull()?.let { TextAccess(it.textHash, textRole = it.role) }
         }
     }
@@ -42,6 +43,7 @@ class TextRoleProvisionDao @Inject constructor(dataSource: DataSource) {
                 this.textHash = textHash
                 this.role = role
                 this.textProvisionHash = createUniqueTextProvisionHash()
+                this.createdAt = DateTime.now()
             }.textProvisionHash
         }
     }
@@ -52,7 +54,7 @@ class TextRoleProvisionDao @Inject constructor(dataSource: DataSource) {
             do  {
                 textProvisionHash = Random.nextLong().toString().md5()
 
-            } while (!TextsEntry.find { TextRoleProvision.textProvisionHash eq textProvisionHash }.empty())
+            } while (!TextRoleProvisionEntry.find { TextRoleProvision.textProvisionHash eq textProvisionHash }.empty())
             textProvisionHash
         }
     }
