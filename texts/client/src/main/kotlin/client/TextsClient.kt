@@ -2,6 +2,7 @@ package client
 
 import com.google.gson.GsonBuilder
 import mu.KLogging
+import pojo.TextDetails
 
 class TextsClient(clientUrl: String  = "http://localhost:1581") {
     private val client = HttpClient(clientUrl)
@@ -13,6 +14,10 @@ class TextsClient(clientUrl: String  = "http://localhost:1581") {
         const val TEXTS = "/texts"
         const val ACCOUNT = "/account"
         const val TEXT_AUTH_TOKEN = "/text-auth"
+    }
+
+    fun getTextDetails(textHash: String): TextDetails {
+        return gson.fromJson(client.get("$TEXT_PATH/$textHash").body?.string(), TextDetails::class.java)
     }
 
 //    fun getTextAuthenticationForProvision(textProvision: String): String {

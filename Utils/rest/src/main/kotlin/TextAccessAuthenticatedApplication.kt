@@ -1,3 +1,5 @@
+import TextJwtConfig.TEXT_HASH_CLAIM
+import TextJwtConfig.TEXT_ROLE_CLAIM
 import aurthorization.RoleAuthorization
 import client.TextsClient
 import io.ktor.application.Application
@@ -21,8 +23,8 @@ fun Application.textAccessAuthenticatedModule() {
             verifier(TextJwtConfig.verifier)
             realm = "ktor.io"
             validate {
-                val textDetails = it.payload.getClaim("textHash").asString().let(textsClient::getTextDetails)
-                val textRole = it.payload.getClaim("textPermission").asString()!!.let(TextRole::valueOf)
+                val textDetails = it.payload.getClaim(TEXT_HASH_CLAIM).asString().let(textsClient::getTextDetails)
+                val textRole = it.payload.getClaim(TEXT_ROLE_CLAIM).asString()!!.let(TextRole::valueOf)
                 TextPrincipal(textDetails, textRole)
             }
         }

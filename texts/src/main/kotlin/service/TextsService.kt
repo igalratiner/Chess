@@ -21,6 +21,10 @@ class TextsService @Inject constructor(private val textsDao: TextsDao,
         return textDetails
     }
 
+    fun getTextDetails(textHash: String): TextDetails {
+        return textsDao.getText(textHash)!!
+    }
+
     fun updateText() {
 
     }

@@ -2,6 +2,7 @@ package client
 
 import com.google.gson.GsonBuilder
 import mu.KLogging
+import okhttp3.Headers.Companion.toHeaders
 import java.io.IOException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -15,21 +16,23 @@ class HttpClient(private val url: String = "https://localhost:5000") {
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
     @Throws(IOException::class)
-    fun post(path: String, requestObject: Any): Response {
+    fun post(path: String, requestObject: Any, headersMap : Map<String, String>? = null): Response {
         val body = gson.toJson(requestObject).toRequestBody(JSON)
         val request = Request.Builder()
                 .url(url + path)
+                .addHeaders(headersMap)
                 .post(body)
                 .build()
         return client.newCall(request).execute()
     }
 
     @Throws(IOException::class)
-    fun put(path: String, requestObject: Any): Response {
+    fun put(path: String, requestObject: Any, headersMap : Map<String, String>? = null): Response {
         val body = gson.toJson(requestObject).toRequestBody(JSON)
         val request = Request.Builder()
                 .url(url + path)
-                .post(body)
+                .addHeaders(headersMap)
+                .put(body)
                 .build()
         return client.newCall(request).execute()
     }
@@ -38,6 +41,7 @@ class HttpClient(private val url: String = "https://localhost:5000") {
     fun get(path: String, headersMap : Map<String, String>? = null): Response {
         val requestBuilder = Request.Builder()
                 .url(url + path)
+                .addHeaders(headersMap)
                 .get()
         val request : Request = if (headersMap == null) { requestBuilder.build() } else {
             headersMap.forEach{ (header, value) -> requestBuilder.addHeader(header, value) }
@@ -45,5 +49,13 @@ class HttpClient(private val url: String = "https://localhost:5000") {
         }
         KLogging().logger.info { "my requesrt: $request" }
         return client.newCall(request).execute()
+    }
+
+    private fun Request.Builder.addHeaders(headersMap: Map<String, String>?): Request.Builder {
+        val headers = headersMap?.toHeaders()
+        if (headers != null) {
+            headers(headers)
+        }
+        return this
     }
 }
