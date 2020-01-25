@@ -2,10 +2,6 @@ version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     compile project(':accounts:client')
     compile project(':utils:http')

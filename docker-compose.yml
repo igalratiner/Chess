@@ -46,7 +46,7 @@ services:
   texts:
     build:
       context: .
-      dockerfile: ./game-master/Dockerfile
+      dockerfile: ./texts/Dockerfile
     ports:
       - "5118:5000"
 

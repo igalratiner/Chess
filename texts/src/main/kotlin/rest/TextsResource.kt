@@ -4,7 +4,9 @@ import TEXT_ACCESS_AUTH
 import TextPrincipal
 import account
 import aurthorization.rolesAllowed
+import client.TextsClient.Companion.ACCOUNT
 import client.TextsClient.Companion.TEXTS
+import client.TextsClient.Companion.TEXT_AUTH_TOKEN
 import client.TextsClient.Companion.TEXT_PATH
 import client.TextsClient.Companion.TEXT_PROVISION
 import com.google.inject.Inject
@@ -26,21 +28,23 @@ class TextsResource @Inject constructor(application: Application, textsService: 
 
     companion object : KLogging() {
         const val TEXT_HASH = "textHash"
-        const val TEXT_ROLE = " textRole"
+        const val TEXT_ROLE = "textRole"
     }
 
     init {
         application.routing {
-            route("/$TEXT_PROVISION/{$TEXT_PROVISION}") {
+            route("$TEXT_PROVISION/{$TEXT_PROVISION}") {
                 get {
                     // returns a TextProvision containing jwt role + text hash
-                    textsService.getTextAuthorization(call.parameters[TEXT_PROVISION]!!)
+                    val textAuthorizationToken = textsService.getTextAuthorization(call.parameters[TEXT_PROVISION]!!)
+                    call.respond(textAuthorizationToken)
                 }
             }
             route(TEXTS) {
-                get("/account") {
+                get(ACCOUNT) {
                     // get list of textHash
-                    textsService.getTexts(call.account!!.id)
+                    val accountTexts = textsService.getTexts(call.account!!.id)
+                    call.respond(accountTexts)
                 }
             }
             route(TEXT_PATH) {
@@ -52,13 +56,12 @@ class TextsResource @Inject constructor(application: Application, textsService: 
                     val createdText: TextDetails = textsService.createText(textName, call.account!!.id)
                     call.respond(createdText)
                 }
-                get("/text-authentication") {
-                    // check account is mapped to text permitted accounts
-                    // grant new jwt token
-                    val textHash: String = call.receive()
-                    textsService.getTextAuthorization(call.account!!.id, textHash)
-                }
                 route("/{$TEXT_HASH}") {
+                    get(TEXT_AUTH_TOKEN) {
+                        // check account is mapped to text permitted accounts
+                        // grant new jwt token
+                        textsService.getTextAuthorization(call.account!!.id, call.parameters[TEXT_HASH]!!)
+                    }
                     authenticate(TEXT_ACCESS_AUTH) {
                         handle {
                             val jwtTextHash = this.context.principal<TextPrincipal>()!!.textDetails.hash
