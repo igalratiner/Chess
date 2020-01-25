@@ -3,8 +3,8 @@ import di.TextsModule
 import io.ktor.application.Application
 
 fun Application.module() {
-    Guice.createInjector(TextsModule(this), ExposedModule("texts"))
     baseModule()
     accountAuthenticatedModule()
     textAccessAuthenticatedModule()
+    Guice.createInjector(TextsModule(this), ExposedModule("texts"))
 }

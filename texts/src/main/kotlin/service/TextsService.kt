@@ -42,6 +42,9 @@ class TextsService @Inject constructor(private val textsDao: TextsDao,
     }
 
     fun shareText(textHash: String, role: TextRole): String {
+        if (role == TextRole.OWNER) {
+            throw RuntimeException("Only single owner for text")
+        }
         return textRoleProvisionDao.addProvisionToText(textHash, role)
     }
 

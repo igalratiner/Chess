@@ -57,7 +57,7 @@ class TextsResource @Inject constructor(application: Application, textsService: 
                     call.respond(createdText)
                 }
                 route("/{$TEXT_HASH}") {
-                    get() {
+                    get {
                         textsService.getTextDetails(call.parameters[TEXT_HASH]!!)
                     }
                     get(TEXT_AUTH_TOKEN) {

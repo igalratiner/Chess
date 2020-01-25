@@ -25,7 +25,7 @@ class TextRoleProvisionDao @Inject constructor(dataSource: DataSource) {
 
     init {
         transaction {
-            SchemaUtils.create(TextAccountRole)
+            SchemaUtils.create(TextRoleProvision)
         }
     }
 
