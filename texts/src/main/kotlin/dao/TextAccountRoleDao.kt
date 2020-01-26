@@ -47,17 +47,16 @@ class TextAccountRoleDao @Inject constructor(dataSource: DataSource) {
 
     fun updateTextToAccount(textHash: String, role: TextRole, accountId: Int) {
         transaction(db) {
-            val textAccountRoleEntry = TextAccountRoleEntry.find{(TextAccountRole.accountId eq accountId) and (TextAccountRole.textHash eq textHash)}
+            TextAccountRoleEntry.find { (TextAccountRole.accountId eq accountId) and (TextAccountRole.textHash eq textHash) }
                     .singleOrNull()
-            if (textAccountRoleEntry != null) {
-                textAccountRoleEntry.role = role
-            } else {
-                TextAccountRoleEntry.new {
-                    this.accountId = accountId
-                    this.textHash = textHash
-                    this.role = role
-                }
-            }
+                    ?.let {
+                        it.role = role
+                    }
+                    ?: TextAccountRoleEntry.new {
+                        this.accountId = accountId
+                        this.textHash = textHash
+                        this.role = role
+                    }
         }
     }
 

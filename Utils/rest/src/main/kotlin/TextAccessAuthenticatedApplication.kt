@@ -9,9 +9,12 @@ import io.ktor.auth.Authentication
 import io.ktor.auth.Principal
 import io.ktor.auth.authentication
 import io.ktor.auth.jwt.jwt
+import io.ktor.http.HttpStatusCode
+import io.ktor.response.respond
 import okhttp3.internal.http2.Http2Reader.Companion.logger
 import pojo.TextDetails
 import pojo.TextRole
+import javax.naming.NoPermissionException
 
 private val textsClient = TextsClient()
 
@@ -32,9 +35,12 @@ fun Application.textAccessAuthenticatedModule() {
     }
     install(RoleAuthorization) {
         validate { allowedRoles ->
-            logger.info(textRequest!!.textRole.name)
+            logger.info(allowedRoles.toString())
             logger.info(textRequest!!.textDetails.toString())
-            allowedRoles.contains(textRequest!!.textRole)
+            logger.info(textRequest!!.textRole.name)
+            if (!allowedRoles.contains(textRequest!!.textRole)) {
+                respond(HttpStatusCode.Forbidden)
+            }
         }
     }
 }

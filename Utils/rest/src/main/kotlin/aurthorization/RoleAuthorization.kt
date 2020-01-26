@@ -4,6 +4,7 @@ import io.ktor.application.*
 import io.ktor.routing.*
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelinePhase
+import kotlinx.coroutines.runBlocking
 import mu.KLogging
 import pojo.TextRole
 
@@ -43,9 +44,7 @@ class RoleAuthorization internal constructor(config: Configuration) {
                 pipeline: ApplicationCallPipeline,
                 configure: RoleBasedAuthorizer.() -> Unit
         ): RoleAuthorization {
-            val roleBasedAuthorizer = RoleBasedAuthorizer()
-            roleBasedAuthorizer.validate { configure }
-            val configuration = Configuration(roleBasedAuthorizer)
+            val configuration = RoleBasedAuthorizer().apply(configure)
             return RoleAuthorization(configuration)
         }
     }
