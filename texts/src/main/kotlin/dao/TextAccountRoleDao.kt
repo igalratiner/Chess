@@ -49,8 +49,8 @@ class TextAccountRoleDao @Inject constructor(dataSource: DataSource) {
         transaction(db) {
             TextAccountRoleEntry.find { (TextAccountRole.accountId eq accountId) and (TextAccountRole.textHash eq textHash) }
                     .singleOrNull()
-                    ?.let {
-                        it.role = role
+                    ?.apply {
+                        this.role = role
                     }
                     ?: TextAccountRoleEntry.new {
                         this.accountId = accountId

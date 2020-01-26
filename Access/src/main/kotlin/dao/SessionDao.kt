@@ -30,15 +30,15 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
 
     fun getSessionForUserId(userId: Int): Session {
         return transaction(db) {
-            val sessionEntry = SessionEntry.find { Sessions.userId eq userId }.singleOrNull()
-            if (sessionEntry != null) {
-                if (checkTokenCreatedAtLastDay(Instant.ofEpochMilli(sessionEntry.createdAt.millis))) {
-                    return@transaction Session(sessionEntry.token, sessionEntry.createdAt.millis)
-                }  else {
-                    sessionEntry.delete()
-                }
-            }
-            return@transaction SessionEntry.new {
+            SessionEntry.find { Sessions.userId eq userId }.singleOrNull()
+                    ?.let {
+                        if (checkTokenCreatedAtLastDay(Instant.ofEpochMilli(it.createdAt.millis))) {
+                            return@transaction Session(it.token, it.createdAt.millis)
+                        }  else {
+                            it.delete()
+                        }
+                    }
+            SessionEntry.new {
                 this.userId = userId
                 this.token = getUniqueSessionToken()
                 this.createdAt = DateTime.now()
