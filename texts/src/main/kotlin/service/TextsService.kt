@@ -8,8 +8,10 @@ import dao.TextsDao
 import io.ktor.features.NotFoundException
 import io.ktor.util.KtorExperimentalAPI
 import mu.KLogging
+import pojo.Account
 import pojo.TextDetails
 import pojo.TextRole
+import javax.naming.NoPermissionException
 
 class TextsService @Inject constructor(private val textsDao: TextsDao,
                                        private val textAccountRoleDao: TextAccountRoleDao,
@@ -39,9 +41,9 @@ class TextsService @Inject constructor(private val textsDao: TextsDao,
     }
 
     fun shareTextWithAccount(textHash: String, role: TextRole, usernameToShareWith: String) {
+        shareText(textHash, role)
         val accountToShareWith = accountsClient.getAccount(usernameToShareWith)
         textAccountRoleDao.updateTextToAccount(textHash, role, accountToShareWith.id)
-        shareText(textHash, role)
     }
 
     fun shareText(textHash: String, role: TextRole): String {

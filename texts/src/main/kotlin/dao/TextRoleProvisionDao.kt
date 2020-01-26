@@ -33,7 +33,7 @@ class TextRoleProvisionDao @Inject constructor(dataSource: DataSource) {
     fun getTextAccess(textProvisionHash: String): TextAccess? {
         return transaction(db) {
             TextRoleProvisionEntry.find{TextRoleProvision.textProvisionHash eq textProvisionHash}
-                    .singleOrNull()?.let { TextAccess(it.textHash, textRole = it.role) }
+                    .singleOrNull()?.let { TextAccess(it.textHash, it.role) }
         }
     }
 

@@ -33,7 +33,7 @@ class TextsDao @Inject constructor(dataSource: DataSource) {
 
     fun createText(textName: String): TextDetails {
         return transaction(db) {
-            return@transaction TextsEntry.new {
+            TextsEntry.new {
                 this.textName = textName
                 this.textHash = createUniqueTextHash()
             }.let { TextDetails(it.textHash, it.textName) }
@@ -53,7 +53,7 @@ class TextsDao @Inject constructor(dataSource: DataSource) {
                 textHash = Random.nextLong().toString().md5()
 
             } while (!TextsEntry.find { Texts.textHash eq textHash }.empty())
-            return@transaction textHash
+            textHash
         }
     }
 }

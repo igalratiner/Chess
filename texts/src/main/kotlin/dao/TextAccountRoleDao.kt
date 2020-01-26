@@ -25,19 +25,19 @@ class TextAccountRoleDao @Inject constructor(dataSource: DataSource) {
 
     fun getTextAccounts(textHash: String): List<Int> {
         return transaction(db) {
-            return@transaction TextAccountRoleEntry.find{TextAccountRole.textHash eq textHash}.map { it.accountId }
+            TextAccountRoleEntry.find{TextAccountRole.textHash eq textHash}.map { it.accountId }
         }
     }
 
     fun getTexts(accountId: Int): List<String> {
         return transaction(db) {
-            return@transaction TextAccountRoleEntry.find{TextAccountRole.accountId eq accountId}.map { it.textHash }
+            TextAccountRoleEntry.find{TextAccountRole.accountId eq accountId}.map { it.textHash }
         }
     }
 
     fun getTextRole(accountId: Int, textHash: String): TextRole? {
         return transaction(db) {
-            return@transaction TextAccountRoleEntry.find{ (TextAccountRole.accountId eq accountId) and (TextAccountRole.textHash eq textHash)}.singleOrNull()?.role
+            TextAccountRoleEntry.find{ (TextAccountRole.accountId eq accountId) and (TextAccountRole.textHash eq textHash)}.singleOrNull()?.role
         }
     }
 
@@ -49,7 +49,6 @@ class TextAccountRoleDao @Inject constructor(dataSource: DataSource) {
         transaction(db) {
             val textAccountRoleEntry = TextAccountRoleEntry.find{(TextAccountRole.accountId eq accountId) and (TextAccountRole.textHash eq textHash)}
                     .singleOrNull()
-
             if (textAccountRoleEntry != null) {
                 textAccountRoleEntry.role = role
             } else {
