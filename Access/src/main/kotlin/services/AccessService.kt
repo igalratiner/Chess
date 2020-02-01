@@ -1,5 +1,6 @@
 package services
 
+import authentication.SessionAuthenticationException
 import crypto.MD5_LENGTH
 import responses.Session
 import client.AccountsClient
@@ -40,10 +41,14 @@ class AccessService @Inject constructor(private val userCredentialsDao: UserCred
     }
     
     fun getAccountFromSessionToken(sessionToken: String) : Account {
-        validateSessionToken(sessionToken)
-        val userId = sessionDao.getUserForSessionKey(sessionToken) ?: throw UserNotExistingException()
-        val username = userCredentialsDao.getUsername(userId)
-        return accountsClient.getAccount(username)
+        try {
+            validateSessionToken(sessionToken)
+            val userId = sessionDao.getUserForSessionKey(sessionToken) ?: throw UserNotExistingException()
+            val username = userCredentialsDao.getUsername(userId)
+            return accountsClient.getAccount(username)
+        } catch (e: Exception) {
+            throw SessionAuthenticationException()
+        }
     }
     
     private fun encryptPassword(password: String) : String {

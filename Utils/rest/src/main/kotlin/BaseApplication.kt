@@ -26,14 +26,17 @@ fun Application.baseModule() {
         }
     }
     install(StatusPages) {
-        exception<AuthenticationException> {
+        exception<AuthenticationException> { cause ->
             call.respond(HttpStatusCode.Forbidden)
+            throw cause
         }
-        exception<RoleAuthorizationException> {
+        exception<RoleAuthorizationException> { cause ->
             call.respond(HttpStatusCode.Unauthorized)
+            throw cause
         }
-        exception<Throwable> {
+        exception<Throwable> { cause ->
             call.respond(HttpStatusCode.InternalServerError)
+            throw cause
         }
     }
 }

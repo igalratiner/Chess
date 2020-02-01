@@ -58,4 +58,13 @@ class HttpClient(private val url: String = "https://localhost:5000") {
         }
         return this
     }
+
+    private fun OkHttpClient.executeRequest(request: Request): Response {
+        val response = this.newCall(request).execute()
+        if (response.isSuccessful) {
+            return response
+        } else {
+            throw CallFailedException(response.message)
+        }
+    }
 }

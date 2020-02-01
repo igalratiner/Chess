@@ -8,15 +8,11 @@ import aurthorization.RoleAuthorizationException
 import client.TextsClient
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
-import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.auth.Authentication
 import io.ktor.auth.Principal
 import io.ktor.auth.authentication
 import io.ktor.auth.jwt.jwt
-import io.ktor.features.StatusPages
-import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
 import okhttp3.internal.http2.Http2Reader.Companion.logger
 import pojo.TextDetails
 import pojo.TextRole

@@ -43,7 +43,7 @@ class TextsResource @Inject constructor(application: Application, textsService: 
                 }
             }
             route(TEXTS) {
-                get(ACCOUNT) {
+                get() {
                     // get list of textHash
                     val accountTexts = textsService.getTexts(call.account!!.id)
                     call.respond(accountTexts)
@@ -99,20 +99,20 @@ class TextsResource @Inject constructor(application: Application, textsService: 
                             }
                         }
 
-//                        // roles allowed Owner + Editor
-//                        rolesAllowed(OWNER, EDITOR) {
-//                            put {
-//                                textsService.updateText()
-//                                // update text
-//                            }
-//                        }
-//
-//                        // roles allowed Owner + Editor + Reader
-//                        rolesAllowed(OWNER, EDITOR, READER) {
-//                            get {
-//                                // get text
-//                            }
-//                        }
+                        // roles allowed Owner + Editor
+                        rolesAllowed(OWNER, EDITOR) {
+                            put {
+                                textsService.updateText()
+                                // update text
+                            }
+                        }
+
+                        // roles allowed Owner + Editor + Reader
+                        rolesAllowed(OWNER, EDITOR, READER) {
+                            get {
+                                // get text
+                            }
+                        }
                     }
                 }
             }
