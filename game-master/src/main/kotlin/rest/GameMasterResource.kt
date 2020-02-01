@@ -1,6 +1,6 @@
 package rest
 
-import account
+import authentication.account
 import com.google.inject.Inject
 import io.ktor.application.Application
 import io.ktor.application.call

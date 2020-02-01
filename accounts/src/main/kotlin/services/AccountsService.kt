@@ -12,14 +12,14 @@ class AccountsService @Inject constructor(private val accountsDao: AccountsDao) 
 
     fun createAccount(accountRequest: AccountRequest): Account {
         val account = accountsDao.createAccount(accountRequest.username)
-        logger.info { "account=$account was created" }
+        logger.info { "authentication.getAccount=$account was created" }
         return account
     }
 
     fun getAccount(username: String) : Account {
-        logger.info { "account was requested by username=$username" }
+        logger.info { "authentication.getAccount was requested by username=$username" }
         val account = accountsDao.getAccountByUsername(username) ?: throw AccountNotExistingException()
-        logger.info { "account=$account was requested by username" }
+        logger.info { "authentication.getAccount=$account was requested by username" }
         return account
     }
 }

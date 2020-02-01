@@ -1,8 +1,8 @@
 package rest
 
-import TEXT_ACCESS_AUTH
-import TextPrincipal
-import account
+import authentication.TEXT_ACCESS_AUTH
+import authentication.TextPrincipal
+import authentication.account
 import aurthorization.rolesAllowed
 import client.TextsClient.Companion.ACCOUNT
 import client.TextsClient.Companion.TEXTS
@@ -52,7 +52,7 @@ class TextsResource @Inject constructor(application: Application, textsService: 
             route(TEXT_PATH) {
                 post {
                     // create an entry in table texts: id, table given name(from body), text hash (generated unique)
-                    // insert to textHash+accounts->OWNER role (textHash+account unique key)
+                    // insert to textHash+accounts->OWNER role (textHash+authentication.getAccount unique key)
                     // return pojo representing textHash + given name
                     val textName: String = call.receive()
                     val createdText: TextDetails = textsService.createText(textName, call.account!!.id)
@@ -63,7 +63,7 @@ class TextsResource @Inject constructor(application: Application, textsService: 
                         call.respond(textsService.getTextDetails(call.parameters[TEXT_HASH]!!))
                     }
                     get(TEXT_AUTH_TOKEN) {
-                        // check account is mapped to text permitted accounts
+                        // check authentication.getAccount is mapped to text permitted accounts
                         // grant new jwt token
                         call.respond(textsService.getTextAuthorization(call.account!!.id, call.parameters[TEXT_HASH]!!))
                     }
@@ -83,9 +83,9 @@ class TextsResource @Inject constructor(application: Application, textsService: 
                                 // payload contains the type of permission granted with textHash
                                 // creates (if not existing) and sends back a TextProvision mapped to the file hash and permission
                             }
-                            post("/share-text-to-account/{$TEXT_ROLE}") {
+                            post("/share-text-to-authentication.getAccount/{$TEXT_ROLE}") {
                                 // payload contains the type of permission granted with textHash
-                                // adds textHash to account:texts mapping
+                                // adds textHash to authentication.getAccount:texts mapping
                                 // creates (if not existing) and sends back a TextProvision mapped to the file hash and permission
                                 val usernameToShareWith: String = call.receive()
                                 textsService.shareTextWithAccount(call.parameters[TEXT_HASH]!!, valueOf(call.parameters[TEXT_ROLE]!!), usernameToShareWith)
@@ -99,20 +99,20 @@ class TextsResource @Inject constructor(application: Application, textsService: 
                             }
                         }
 
-                        // roles allowed Owner + Editor
-                        rolesAllowed(OWNER, EDITOR) {
-                            put {
-                                textsService.updateText()
-                                // update text
-                            }
-                        }
-
-                        // roles allowed Owner + Editor + Reader
-                        rolesAllowed(OWNER, EDITOR, READER) {
-                            get {
-                                // get text
-                            }
-                        }
+//                        // roles allowed Owner + Editor
+//                        rolesAllowed(OWNER, EDITOR) {
+//                            put {
+//                                textsService.updateText()
+//                                // update text
+//                            }
+//                        }
+//
+//                        // roles allowed Owner + Editor + Reader
+//                        rolesAllowed(OWNER, EDITOR, READER) {
+//                            get {
+//                                // get text
+//                            }
+//                        }
                     }
                 }
             }

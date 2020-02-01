@@ -4,13 +4,12 @@ import io.ktor.application.*
 import io.ktor.routing.*
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelinePhase
-import kotlinx.coroutines.runBlocking
 import mu.KLogging
 import pojo.TextRole
 
 class RoleAuthorization internal constructor(config: Configuration) {
 
-    constructor(provider: RoleBasedAuthorizer): this(Configuration(provider))
+    constructor(provider: RoleBasedAuthorizer) : this(Configuration(provider))
 
     private var config = config.copy()
 
@@ -20,19 +19,20 @@ class RoleAuthorization internal constructor(config: Configuration) {
     }
 
     class RoleBasedAuthorizer {
-        internal lateinit var authorizationFunction: suspend ApplicationCall.(Set<TextRole>)->Unit
+        internal lateinit var authorizationFunction: suspend ApplicationCall.(Set<TextRole>) -> Unit
 
-        fun validate(body: suspend ApplicationCall.(Set<TextRole>)-> Unit) {
+        fun validate(body: suspend ApplicationCall.(Set<TextRole>) -> Unit) {
             authorizationFunction = body
         }
     }
 
     fun interceptPipeline(pipeline: ApplicationCallPipeline, roles: Set<TextRole>) {
-        pipeline.addPhase(authorizationPhase)
+        pipeline.insertPhaseAfter(ApplicationCallPipeline.Features, authorizationPhase)
         pipeline.intercept(authorizationPhase) {
             val call = call
             config.provider.authorizationFunction(call, roles)
-        }}
+        }
+    }
 
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, RoleBasedAuthorizer, RoleAuthorization>, KLogging() {
         private val authorizationPhase = PipelinePhase("authorization")
@@ -44,7 +44,8 @@ class RoleAuthorization internal constructor(config: Configuration) {
                 pipeline: ApplicationCallPipeline,
                 configure: RoleBasedAuthorizer.() -> Unit
         ): RoleAuthorization {
-            val configuration = RoleBasedAuthorizer().apply(configure)
+            val configuration = RoleBasedAuthorizer().apply { configure() }
+
             return RoleAuthorization(configuration)
         }
     }
@@ -52,13 +53,13 @@ class RoleAuthorization internal constructor(config: Configuration) {
 
 fun Route.rolesAllowed(vararg roles: TextRole, build: Route.() -> Unit): Route {
     val authorisedRoute = createChild(AuthorisedRouteSelector())
-    application.feature(RoleAuthorization).interceptPipeline(this.application, roles.toSet())
+    application.feature(RoleAuthorization).interceptPipeline(this, roles.toSet())
 
     authorisedRoute.build()
     return authorisedRoute
 }
 
-class AuthorisedRouteSelector: RouteSelector(RouteSelectorEvaluation.qualityConstant) {
+class AuthorisedRouteSelector : RouteSelector(RouteSelectorEvaluation.qualityConstant) {
     override fun evaluate(context: RoutingResolveContext, segmentIndex: Int): RouteSelectorEvaluation =
             RouteSelectorEvaluation.Constant
 }

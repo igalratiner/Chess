@@ -40,7 +40,7 @@ class AccessResource @Inject constructor(application: Application, signingServic
             }
             get("$ACCOUNT_PATH/{session_token}") {
                 val sessionToken : String = call.parameters["session_token"] ?: throw RuntimeException("no valid session token specified in path")
-                logger.info("session token received for account retrieval $sessionToken")
+                logger.info("session token received for authentication.getAccount retrieval $sessionToken")
                 val account = accessService.getAccountFromSessionToken(sessionToken)
                 call.respond(account)
             }

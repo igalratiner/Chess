@@ -1,14 +1,18 @@
+package authentication
+
 import client.AccessClient
 import com.google.gson.Gson
 import io.ktor.application.*
-
+import io.ktor.features.StatusPages
+import io.ktor.http.HttpStatusCode
+import io.ktor.response.respond
 import io.ktor.sessions.*
 import io.ktor.util.AttributeKey
 import pojo.Account
 import responses.Session
 
 
-private val accountAttributeKey: AttributeKey<Account> = AttributeKey("account")
+private val accountAttributeKey: AttributeKey<Account> = AttributeKey("authentication.getAccount")
 private val accessClient = AccessClient()
 
 fun Application.accountAuthenticatedModule() {
@@ -26,9 +30,10 @@ fun Application.accountAuthenticatedModule() {
     }
 }
 
-val ApplicationCall.account get(): Account? {
-    return if (attributes.contains(accountAttributeKey)) attributes[accountAttributeKey] else null
-}
+val ApplicationCall.account
+    get(): Account? {
+        return if (attributes.contains(accountAttributeKey)) attributes[accountAttributeKey] else null
+    }
 
 class GsonSessionSerializer(
         private val type: java.lang.reflect.Type,

@@ -1,0 +1,3 @@
+package authentication
+
+class TextAuthenticationException: AuthenticationException()
