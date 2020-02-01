@@ -3,9 +3,6 @@ package authentication
 import client.AccessClient
 import com.google.gson.Gson
 import io.ktor.application.*
-import io.ktor.features.StatusPages
-import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
 import io.ktor.sessions.*
 import io.ktor.util.AttributeKey
 import pojo.Account
@@ -22,10 +19,14 @@ fun Application.accountAuthenticatedModule() {
         }
     }
     intercept(ApplicationCallPipeline.Call) {
-        val session: Session? = call.sessions.get()
-        if (session != null) {
-            val account = accessClient.getSessionAccount(session.token)
-            call.attributes.put(accountAttributeKey, account)
+        try {
+            val session: Session? = call.sessions.get()
+            if (session != null) {
+                val account = accessClient.getSessionAccount(session.token)
+                call.attributes.put(accountAttributeKey, account)
+            }
+        } catch (e: Exception) {
+            throw SessionAuthenticationException()
         }
     }
 }
