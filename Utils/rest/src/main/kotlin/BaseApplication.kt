@@ -1,7 +1,5 @@
 import aurthorization.RoleAuthorizationException
 import authentication.AuthenticationException
-import authentication.SessionAuthenticationException
-import authentication.TextAuthenticationException
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
