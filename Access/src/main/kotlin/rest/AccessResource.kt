@@ -11,6 +11,7 @@ import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
+import mu.KLogging
 import mu.KotlinLogging
 import requests.Credentials
 import services.AccessService
@@ -18,9 +19,10 @@ import services.AccessService
 import services.SigningService
 
 
-class AccessResource @Inject constructor(application: Application, signingService: SigningService, accessService: AccessService)  {
+class AccessResource @Inject constructor(application: Application, signingService: SigningService, accessService: AccessService) {
+    companion object : KLogging()
+
     init {
-        val logger = KotlinLogging.logger {}
         application.routing {
             post(LOGIN_PATH) {
                 val credentials: Credentials = call.receive()
@@ -38,7 +40,7 @@ class AccessResource @Inject constructor(application: Application, signingServic
             }
             get("$ACCOUNT_PATH/{session_token}") {
                 val sessionToken : String = call.parameters["session_token"] ?: throw RuntimeException("no valid session token specified in path")
-                logger.info("session token received for account retrieval $sessionToken")
+                logger.info("session token received for authentication.getAccount retrieval $sessionToken")
                 val account = accessService.getAccountFromSessionToken(sessionToken)
                 call.respond(account)
             }

@@ -24,30 +24,49 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
 
     init {
         transaction {
-            SchemaUtils.create(UserCredentials, SessionTokens)
+            SchemaUtils.create(UserCredentials, Sessions)
         }
     }
 
     fun getSessionForUserId(userId: Int): Session {
         return transaction(db) {
-            val sessionEntries = SessionTokenEntry.find { SessionTokens.userId eq userId }
-            if (!sessionEntries.empty() && checkTokenCreatedAtLastDay(Instant.ofEpochMilli(sessionEntries.elementAt(0).createdAt.millis))) {
-                return@transaction sessionEntries.elementAt(0).let { sessionTokenEntry -> Session(sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
-            }
-            if (!sessionEntries.empty()) {
-                sessionEntries.elementAt(0).delete()
-            }
-            return@transaction SessionTokenEntry.new {
+            SessionEntry.find { Sessions.userId eq userId }.singleOrNull()
+                    ?.let {
+                        if (checkTokenCreatedAtLastDay(Instant.ofEpochMilli(it.createdAt.millis))) {
+                            return@transaction Session(it.token, it.createdAt.millis)
+                        }  else {
+                            it.delete()
+                        }
+                    }
+            SessionEntry.new {
                 this.userId = userId
-                this.token = Random.nextLong().toString().md5()
+                this.token = getUniqueSessionToken()
                 this.createdAt = DateTime.now()
-            }.let { sessionTokenEntry -> Session(sessionTokenEntry.token, Instant.ofEpochMilli(sessionTokenEntry.createdAt.millis)) }
+            }.let { sessionTokenEntry -> Session(sessionTokenEntry.token, sessionTokenEntry.createdAt.millis) }
         }
     }
     
     fun getUserForSessionKey(sessionToken: String) : Int? {
         return transaction(db) {
-            SessionTokenEntry.find { SessionTokens.token eq sessionToken }.singleOrNull()?.userId
+            SessionEntry.find { Sessions.token eq sessionToken }.singleOrNull()?.userId
+        }
+    }
+
+    private fun getUniqueSessionToken(): String {
+        var sessionToken: String
+        return transaction(db) {
+            do  {
+                sessionToken = Random.nextLong().toString().md5()
+
+            } while (!SessionEntry.find { Sessions.token eq sessionToken }.empty())
+            return@transaction sessionToken
+        }
+    }
+
+    private fun deleteSessionsBefore(timeInMilli: Long) {
+        transaction(db) {
+            SessionEntry.find { Sessions.createdAt less DateTime(Instant.now().minusMillis(timeInMilli)) }
+                    .forEach(SessionEntry::delete)
         }
     }
 
@@ -56,17 +75,17 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
         return tokenCreationInstant.isAfter(dayBefore)
     }
 
-    object SessionTokens : IntIdTable() {
+    object Sessions : IntIdTable() {
         val userId = integer("user_id").uniqueIndex().references(UserCredentials.id)
         val token = varchar("token", 50).uniqueIndex()
         val createdAt = datetime("created_at")
     }
 
-    class SessionTokenEntry(id: EntityID<Int>) : Entity<Int>(id) {
-        companion object : EntityClass<Int, SessionTokenEntry>(SessionTokens)
+    class SessionEntry(id: EntityID<Int>) : Entity<Int>(id) {
+        companion object : EntityClass<Int, SessionEntry>(Sessions)
 
-        var userId by SessionTokens.userId
-        var token by SessionTokens.token
-        var createdAt by SessionTokens.createdAt
+        var userId by Sessions.userId
+        var token by Sessions.token
+        var createdAt by Sessions.createdAt
     }
 }

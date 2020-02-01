@@ -1,10 +1,12 @@
 import authentication.accountAuthenticatedModule
+import authentication.textAccessAuthenticatedModule
 import com.google.inject.Guice
-import di.GameMasterModule
+import di.TextsModule
 import io.ktor.application.Application
 
 fun Application.module() {
-    Guice.createInjector(GameMasterModule(this))
     baseModule()
     accountAuthenticatedModule()
+    textAccessAuthenticatedModule()
+    Guice.createInjector(TextsModule(this), ExposedModule("texts"))
 }
