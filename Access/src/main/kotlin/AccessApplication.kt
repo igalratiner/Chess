@@ -3,6 +3,6 @@ import di.AccessModule
 import io.ktor.application.Application
 
 fun Application.module() {
-    Guice.createInjector(AccessModule(this), ExposedModule("access"))
+    Guice.createInjector(AccessModule(this), ExposedGuiceModule("access"))
     baseModule()
 }
