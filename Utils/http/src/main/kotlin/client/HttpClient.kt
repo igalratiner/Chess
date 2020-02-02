@@ -23,7 +23,7 @@ class HttpClient(private val url: String = "https://localhost:5000") {
                 .addHeaders(headersMap)
                 .post(body)
                 .build()
-        return client.newCall(request).execute()
+        return client.executeRequest(request)
     }
 
     @Throws(IOException::class)
@@ -34,7 +34,7 @@ class HttpClient(private val url: String = "https://localhost:5000") {
                 .addHeaders(headersMap)
                 .put(body)
                 .build()
-        return client.newCall(request).execute()
+        return client.executeRequest(request)
     }
 
     @Throws(IOException::class)
@@ -48,7 +48,7 @@ class HttpClient(private val url: String = "https://localhost:5000") {
             requestBuilder.build()
         }
         KLogging().logger.info { "my requesrt: $request" }
-        return client.newCall(request).execute()
+        return client.executeRequest(request)
     }
 
     private fun Request.Builder.addHeaders(headersMap: Map<String, String>?): Request.Builder {

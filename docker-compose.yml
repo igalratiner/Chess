@@ -1,27 +1,6 @@
 version: '3'
 services:
 
-  chess-server:
-    build:
-      context: .
-      dockerfile: ./Server/Dockerfile
-    ports:
-      - "5111:5000"
-
-  computer-opponent:
-    build:
-      context: .
-      dockerfile: ./Computer/Dockerfile
-    ports:
-      - "5112:5000"
-
-  chess-engine:
-    build:
-      context: .
-      dockerfile: ./Engine/Dockerfile
-    ports:
-      - "5114:5000"
-
   access:
     build:
       context: .
@@ -49,6 +28,13 @@ services:
       dockerfile: ./texts/Dockerfile
     ports:
       - "5118:5000"
+
+  commits:
+    build:
+      context: .
+      dockerfile: ./commits/Dockerfile
+    ports:
+      - "5119:5000"
 
   shared-editor-db:
     build:
