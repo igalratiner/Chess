@@ -8,5 +8,5 @@ fun Application.module() {
     baseModule()
     accountAuthenticatedModule()
     textAccessAuthenticatedModule()
-    Guice.createInjector(TextsModule(this), ExposedModule("texts"))
+    Guice.createInjector(TextsModule(this), ExposedGuiceModule("texts"))
 }
