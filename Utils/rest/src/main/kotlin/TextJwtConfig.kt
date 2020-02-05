@@ -1,18 +1,20 @@
 import com.auth0.jwt.*
 import com.auth0.jwt.algorithms.*
+import com.google.gson.Gson
 import pojo.TextDetails
 import pojo.TextRole
 import java.util.*
 
 object TextJwtConfig {
 
-    const val TEXT_HASH_CLAIM = "textHash"
     const val TEXT_ROLE_CLAIM = "textRole"
+    const val TEXT_DETAILS_CLAIM = "textDetails"
 
     private const val secret = "cBDMBZAB423Iz0MZopTW"
     private const val issuer = "http://localhost:1581"
     private const val validityInMs = 36_000_00 * 24 // 24 hours
     private val algorithm = Algorithm.HMAC512(secret)
+    private val gson = Gson()
 
     val verifier: JWTVerifier = JWT
             .require(algorithm)
@@ -25,7 +27,7 @@ object TextJwtConfig {
     fun makeToken(textDetails: TextDetails, textRole: TextRole): String = JWT.create()
             .withSubject("Authentication")
             .withIssuer(issuer)
-            .withClaim(TEXT_HASH_CLAIM, textDetails.hash)
+            .withClaim(TEXT_DETAILS_CLAIM, textDetails)
             .withClaim(TEXT_ROLE_CLAIM, textRole.name)
             .withExpiresAt(getExpiration())
             .sign(algorithm)
@@ -35,4 +37,8 @@ object TextJwtConfig {
      */
     private fun getExpiration() = Date(System.currentTimeMillis() + validityInMs)
 
+    private fun JWTCreator.Builder.withClaim(name: String, value: Any): JWTCreator.Builder {
+        withClaim(name, gson.toJson(value))
+        return this
+    }
 }

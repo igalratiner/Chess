@@ -1,11 +1,11 @@
 package authentication
 
 import TextJwtConfig
-import TextJwtConfig.TEXT_HASH_CLAIM
+import TextJwtConfig.TEXT_DETAILS_CLAIM
 import TextJwtConfig.TEXT_ROLE_CLAIM
 import aurthorization.RoleAuthorization
 import aurthorization.RoleAuthorizationException
-import client.TextsClient
+import com.google.gson.Gson
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.install
@@ -16,7 +16,7 @@ import io.ktor.auth.jwt.jwt
 import pojo.TextDetails
 import pojo.TextRole
 
-private val textsClient = TextsClient()
+private val gson = Gson()
 
 const val TEXT_ACCESS_AUTH = "textAccessAuth"
 
@@ -27,8 +27,8 @@ fun Application.textAccessAuthenticatedModule() {
             verifier(TextJwtConfig.verifier)
             realm = "ktor.io"
             validate {
-                val textDetails = it.payload.getClaim(TEXT_HASH_CLAIM).asString().let(textsClient::getTextDetails)
-                val textRole = it.payload.getClaim(TEXT_ROLE_CLAIM).asString().let(TextRole::valueOf)
+                val textDetails: TextDetails = it.payload.getClaim(TEXT_DETAILS_CLAIM).asString().run { gson.fromJson(this, TextDetails::class.java) }
+                val textRole: TextRole = it.payload.getClaim(TEXT_ROLE_CLAIM).asString().let(TextRole::valueOf)
                 TextPrincipal(textDetails, textRole)
             }
         }
