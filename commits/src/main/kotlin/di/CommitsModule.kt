@@ -2,12 +2,18 @@ package di
 
 
 import org.koin.dsl.module
-import org.koin.experimental.builder.single
-import rest.CommitsResource
+import org.redisson.Redisson
+import org.redisson.RedissonReactive
+import org.redisson.config.Config
 import services.CommitsService
 
 val CommitsModule = module(createdAtStart = true) {
-    single<CommitsResource>()
-    single<CommitsService>()
+
+    single {
+        val config = Config()
+        config.useSingleServer().address = "redis://0.0.0.0:5120"
+        val redisson = Redisson.createReactive(config)
+        CommitsService(redisson)
+    }
 }
 

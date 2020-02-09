@@ -44,16 +44,16 @@ class UserCredentialsDao @Inject constructor(dataSource: DataSource) {
             }.id.value
         }
     }
-}
 
-object UserCredentials : IntIdTable() {
-    val username = varchar("username", 50).uniqueIndex()
-    val password = varchar("password", 50)
-}
+    object UserCredentials : IntIdTable() {
+        val username = varchar("username", 50).uniqueIndex()
+        val password = varchar("password", 50)
+    }
 
-class UserCredentialsEntry(id: EntityID<Int>) : Entity<Int>(id) {
-    companion object : EntityClass<Int, UserCredentialsEntry>(UserCredentials)
+    class UserCredentialsEntry(id: EntityID<Int>) : Entity<Int>(id) {
+        companion object : EntityClass<Int, UserCredentialsEntry>(UserCredentials)
 
-    var username by UserCredentials.username
-    var password by UserCredentials.password
+        var username by UserCredentials.username
+        var password by UserCredentials.password
+    }
 }

@@ -41,15 +41,15 @@ class AccountsDao @Inject constructor(dataSource: DataSource) {
             }.let { accountEntry -> Account(accountEntry.id.value, accountEntry.username) }
         }
     }
-}
 
-object Accounts : IntIdTable() {
-    val username = varchar("username", 50).uniqueIndex()
-}
+    object Accounts : IntIdTable() {
+        val username = varchar("username", 50).uniqueIndex()
+    }
 
 
-class AccountEntry(id: EntityID<Int>) : Entity<Int>(id) {
-    companion object : EntityClass<Int, AccountEntry>(Accounts)
+    class AccountEntry(id: EntityID<Int>) : Entity<Int>(id) {
+        companion object : EntityClass<Int, AccountEntry>(Accounts)
 
-    var username by Accounts.username
+        var username by Accounts.username
+    }
 }

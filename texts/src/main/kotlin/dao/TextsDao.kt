@@ -56,16 +56,16 @@ class TextsDao @Inject constructor(dataSource: DataSource) {
             textHash
         }
     }
-}
 
-object Texts : IntIdTable() {
-    val textHash = varchar("text_hash", 50).uniqueIndex()
-    val textName = varchar("text_name", 100)
-}
+    object Texts : IntIdTable() {
+        val textHash = varchar("text_hash", 50).uniqueIndex()
+        val textName = varchar("text_name", 100)
+    }
 
-class TextsEntry(id: EntityID<Int>) : Entity<Int>(id) {
-    companion object : EntityClass<Int, TextsEntry>(Texts)
+    class TextsEntry(id: EntityID<Int>) : Entity<Int>(id) {
+        companion object : EntityClass<Int, TextsEntry>(Texts)
 
-    var textHash by Texts.textHash
-    var textName by Texts.textName
+        var textHash by Texts.textHash
+        var textName by Texts.textName
+    }
 }

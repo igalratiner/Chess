@@ -26,7 +26,7 @@ class TextRoleProvisionDao @Inject constructor(dataSource: DataSource) {
 
     init {
         transaction {
-            SchemaUtils.create(TextRoleProvision)
+            SchemaUtils.create(TextsDao.Texts, TextRoleProvision)
         }
     }
 
@@ -81,20 +81,20 @@ class TextRoleProvisionDao @Inject constructor(dataSource: DataSource) {
                     .forEach(TextRoleProvisionEntry::delete)
         }
     }
-}
 
-object TextRoleProvision : IntIdTable() {
-    val textHash = varchar("text_hash", 50)
-    val role = enumerationByName("role", 25, TextRole::class)
-    val textProvisionHash = varchar("text_provision", 50).uniqueIndex()
-    val createdAt = datetime("created_at")
-}
+    object TextRoleProvision : IntIdTable() {
+        val textHash = varchar("text_hash", 50).references(TextsDao.Texts.textHash)
+        val role = enumerationByName("role", 25, TextRole::class)
+        val textProvisionHash = varchar("text_provision", 50).uniqueIndex()
+        val createdAt = datetime("created_at")
+    }
 
-class TextRoleProvisionEntry(id: EntityID<Int>) : Entity<Int>(id) {
-    companion object : EntityClass<Int, TextRoleProvisionEntry>(TextRoleProvision)
+    class TextRoleProvisionEntry(id: EntityID<Int>) : Entity<Int>(id) {
+        companion object : EntityClass<Int, TextRoleProvisionEntry>(TextRoleProvision)
 
-    var textHash by TextRoleProvision.textHash
-    var role by TextRoleProvision.role
-    var textProvisionHash by TextRoleProvision.textProvisionHash
-    var createdAt by TextRoleProvision.createdAt
+        var textHash by TextRoleProvision.textHash
+        var role by TextRoleProvision.role
+        var textProvisionHash by TextRoleProvision.textProvisionHash
+        var createdAt by TextRoleProvision.createdAt
+    }
 }

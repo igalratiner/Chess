@@ -24,7 +24,7 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
 
     init {
         transaction {
-            SchemaUtils.create(UserCredentials, Sessions)
+            SchemaUtils.create(UserCredentialsDao.UserCredentials, Sessions)
         }
     }
 
@@ -76,7 +76,7 @@ class SessionDao @Inject constructor(dataSource: DataSource) {
     }
 
     object Sessions : IntIdTable() {
-        val userId = integer("user_id").uniqueIndex().references(UserCredentials.id)
+        val userId = integer("user_id").uniqueIndex().references(UserCredentialsDao.UserCredentials.id)
         val token = varchar("token", 50).uniqueIndex()
         val createdAt = datetime("created_at")
     }

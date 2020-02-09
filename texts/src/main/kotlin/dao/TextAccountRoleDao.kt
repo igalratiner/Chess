@@ -19,7 +19,7 @@ class TextAccountRoleDao @Inject constructor(dataSource: DataSource) {
 
     init {
         transaction {
-            SchemaUtils.create(TextAccountRole)
+            SchemaUtils.create(TextsDao.Texts, TextAccountRole)
         }
     }
 
@@ -74,21 +74,21 @@ class TextAccountRoleDao @Inject constructor(dataSource: DataSource) {
                     .forEach(TextAccountRoleEntry::delete)
         }
     }
-}
 
-object TextAccountRole : IntIdTable() {
-    val textHash = varchar("text_hash", 50)
-    val accountId = integer("account_id")
-    val role = enumerationByName("role", 25, TextRole::class)
-    init {
-        this.uniqueIndex(textHash, accountId)
+    object TextAccountRole : IntIdTable() {
+        val textHash = varchar("text_hash", 50).references(TextsDao.Texts.textHash)
+        val accountId = integer("account_id")
+        val role = enumerationByName("role", 25, TextRole::class)
+        init {
+            this.uniqueIndex(textHash, accountId)
+        }
     }
-}
 
-class TextAccountRoleEntry(id: EntityID<Int>) : Entity<Int>(id) {
-    companion object : EntityClass<Int, TextAccountRoleEntry>(TextAccountRole)
+    class TextAccountRoleEntry(id: EntityID<Int>) : Entity<Int>(id) {
+        companion object : EntityClass<Int, TextAccountRoleEntry>(TextAccountRole)
 
-    var textHash by TextAccountRole.textHash
-    var accountId by TextAccountRole.accountId
-    var role by TextAccountRole.role
+        var textHash by TextAccountRole.textHash
+        var accountId by TextAccountRole.accountId
+        var role by TextAccountRole.role
+    }
 }

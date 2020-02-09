@@ -36,6 +36,13 @@ services:
     ports:
       - "5119:5000"
 
+  shared-editor-redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "5120:6379"
+
   shared-editor-db:
     build:
       context: .
