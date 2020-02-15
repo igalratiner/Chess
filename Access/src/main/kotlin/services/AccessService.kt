@@ -12,7 +12,7 @@ import exceptions.UserAlreadyExistsException
 import exceptions.UserNotExistingException
 import pojo.Account
 import responses.Session
-import security.checkHash
+import security.validHash
 
 class AccessService @Inject constructor(private val userCredentialsDao: UserCredentialsDao,
                                         private val sessionDao: SessionDao,
@@ -56,7 +56,7 @@ class AccessService @Inject constructor(private val userCredentialsDao: UserCred
     }
 
     private fun validateSessionToken(sessionToken: String) {
-        if (!checkHash(sessionToken, MD5_LENGTH)) {
+        if (!sessionToken.validHash(MD5_LENGTH)) {
             throw InvalidSessionTokenException()
         }
     }
