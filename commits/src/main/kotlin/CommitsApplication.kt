@@ -10,7 +10,7 @@ import org.koin.ktor.ext.Koin
 import rest.commits
 
 fun Application.module() {
-    baseModule()
+    securedBaseModule()
     textAccessAuthenticatedModule()
     install(Koin) {
         slf4jLogger()

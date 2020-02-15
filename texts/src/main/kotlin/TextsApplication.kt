@@ -5,7 +5,7 @@ import di.TextsModule
 import io.ktor.application.Application
 
 fun Application.module() {
-    baseModule()
+    securedBaseModule()
     accountAuthenticatedModule()
     textAccessAuthenticatedModule()
     Guice.createInjector(TextsModule(this), ExposedGuiceModule("texts"))
