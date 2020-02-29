@@ -1,54 +1,54 @@
 package services
 
 import com.google.inject.Inject
-import crypto.md5
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
 import mu.KLogging
 import org.redisson.api.*
 import pojo.Commit
 import pojo.CommitRequest
+import services.exceptions.CommitNotInOrderException
 import services.exceptions.TextCommitsNotExistException
-import java.lang.Exception
 import java.util.*
-import kotlin.collections.HashSet
 
 @ExperimentalCoroutinesApi
 class CommitsService @Inject constructor(private val redissonClient: RedissonClient) {
 
     companion object : KLogging()
 
-    val commitIncomingChannel = Channel<Pair<String, Commit>>()
+    val commitIncomingChannel = Channel<Triple<String, Commit, Channel<CommitsNotification>>>()
 
-    private val outgoingNotificationChannels = HashMap<String, MutableSet<Channel<CommitsNotification>>>()
+    private val textCommitsBrokersMap = HashMap<String, CommitsBroker>()
 
-    private val shipNotificationsChannel = Channel<Triple<Channel<CommitsNotification>, CommitsNotification, String>>()
-
-    val deleteOldChannelsChannel = Channel<Pair<String, ReceiveChannel<CommitsNotification>>>()
-
-    private val textCommitsMap = redissonClient.getMap<String, RList<Commit>>("textCommitsMap")
+    private val textHashes = redissonClient.getSet<String>("texts")
 
     init {
         GlobalScope.distributeCommits()
     }
 
     @ExperimentalCoroutinesApi
-    fun connect(textHash: String): ReceiveChannel<CommitsNotification> {
+    fun connect(textHash: String): Pair<Int, Channel<CommitsNotification>> {
         return runBlocking {
             logger.info { "connection to textHash=$textHash requested" }
-            textCommitsMap[textHash] ?: throw TextCommitsNotExistException()
-            outgoingNotificationChannels.putIfAbsent(textHash, HashSet())
+            val textCommitsBroker = populateAndRetrieveCommitsBroker(textHash)
+
             val notificationChannel = Channel<CommitsNotification>()
-            outgoingNotificationChannels[textHash]!!.add(notificationChannel)
+
+            val listenerId = textCommitsBroker.subscribe {
+                runBlocking {
+                    notificationChannel.send(CommitsNotification.NextCommit(it))
+                }
+            }
+
             logger.info { "connection to textHash=$textHash commits established" }
-            notificationChannel
+            listenerId to notificationChannel
         }
     }
 
     fun createTextCommits(textHash: String): Boolean {
-        val textCommits = redissonClient.getList<Commit>(textHash.md5())
-        if (textCommitsMap.putIfAbsent(textHash, textCommits) === textCommits) {
+        if (textHashes.add(textHash)) {
+            val textCommitsBroker = redissonClient.getCommitsBroker(textHash)
+            textCommitsBrokersMap[textHash] = textCommitsBroker
             logger.info { "commits of textHash=$textHash were created" }
             return true
         }
@@ -57,21 +57,35 @@ class CommitsService @Inject constructor(private val redissonClient: RedissonCli
     }
 
     fun getCommits(textHash: String, commitRequests: List<CommitRequest>? = null): List<Commit> {
-        val textCommits = textCommitsMap[textHash] ?: throw TextCommitsNotExistException()
+        val textCommitsBroker = textCommitsBrokersMap[textHash]!!
         val commitsRequested = LinkedList<Commit>()
         if (commitRequests != null) {
             for (commitRequest in commitRequests) {
-                commitsRequested.add(textCommits[commitRequest.index])
+                commitsRequested.add(textCommitsBroker[commitRequest.index])
             }
-        } else {
-            commitsRequested.addAll(textCommits)
+            return commitsRequested
         }
-        return commitsRequested
+        return textCommitsBroker.getAll()
+
+    }
+
+    private fun populateAndRetrieveCommitsBroker(textHash: String): CommitsBroker {
+        if (!textHashes.contains(textHash)) {
+            throw TextCommitsNotExistException()
+        }
+        val textCommitsBrokers = textCommitsBrokersMap[textHash]
+        if (textCommitsBrokers == null) {
+            val textCommitsBrokersFromDB = redissonClient.getCommitsBroker(textHash)
+            textCommitsBrokersMap.putIfAbsent(textHash, textCommitsBrokersFromDB)
+            return textCommitsBrokersFromDB
+        }
+        return textCommitsBrokers
     }
 
     fun deleteCommits(textHash: String) {
-        outgoingNotificationChannels.remove(textHash)
-        textCommitsMap.remove(textHash)
+        textHashes.remove(textHash)
+        textCommitsBrokersMap[textHash]?.unsubscribeAll()
+        textCommitsBrokersMap.remove(textHash)
         logger.info { "commits of textHash=$textHash were deleted" }
     }
 
@@ -80,65 +94,39 @@ class CommitsService @Inject constructor(private val redissonClient: RedissonCli
         /*
         each of the functions below are run by 1 coroutines
          */
-        repeat(1) { shipCommitsNotifications() }
         repeat(1) { addCommits() }
-        repeat(1) { deleteOldNotificationChannels() }
     }
 
-    @ExperimentalCoroutinesApi
-    private fun CoroutineScope.shipCommitsNotifications() = launch {
-        for ((notificationChannel, notificationCommit, textHash) in shipNotificationsChannel) {
-            try {
-                notificationChannel.send(notificationCommit)
-            } catch (e: Exception) {
-                logger.warn { "Can't send to notificationChannel due to ${e.cause}" }
-            }
-        }
-    }
-
-    private fun CoroutineScope.deleteOldNotificationChannels() = launch {
-        for ((textHash, notificationChannel) in deleteOldChannelsChannel) {
-            logger.info { "for textHash=$textHash notificationChannel=$notificationChannel is deleted" }
-            outgoingNotificationChannels[textHash]?.remove(notificationChannel)
-        }
+    fun unsubscribeCommitsListener(textHash: String, listenerId: Int) {
+        textCommitsBrokersMap[textHash]?.unsubscribe(listenerId)
     }
 
     private fun CoroutineScope.addCommits() = launch {
-        for ((textHash, commit) in commitIncomingChannel) {
+        for ((textHash, commit, notificationChannel) in commitIncomingChannel) {
+            logger.info { "commit=$commit is about to be sent";  }
             try {
-                logger.info { "commit=$commit is about to be sent";  }
-                val textCommits = textCommitsMap[textHash] ?: throw TextCommitsNotExistException()
-                if (validateNextCommit(commit, textCommits)) {
-                    textCommits.add(commit)
-                    sendNotificationToSubscribedOnText( CommitsNotification.NextCommit(commit), textHash)
-                }
-                logger.info { "commit=$commit was sent";  }
+                val textCommits = textCommitsBrokersMap[textHash] ?: throw TextCommitsNotExistException()
+                validateNextCommit(commit, textCommits)
+                textCommits.addCommit(commit)
             } catch (e: TextCommitsNotExistException) {
-                logger.error { "Text=$textHash commits are not found" }
-                sendNotificationToSubscribedOnText(CommitsNotification.TextCommitsNotExist, textHash)
+                notificationChannel.send(CommitsNotification.TextCommitsNotExist)
+            } catch (e: CommitNotInOrderException) {
+                notificationChannel.send(CommitsNotification.CommitNotInOrder)
             }
+            logger.info { "commit=$commit was sent";  }
         }
     }
 
-    private suspend fun sendNotificationToSubscribedOnText(notification: CommitsNotification, textHash: String) {
-        val outgoingTextNotificationChannels = outgoingNotificationChannels[textHash]
-        if (outgoingTextNotificationChannels != null) {
-            for (notificationChannel in outgoingTextNotificationChannels.iterator()) {
-                logger.info { "commit=$notification is about to be sent";  }
-
-                shipNotificationsChannel.send(Triple(notificationChannel, notification, textHash))
-                logger.info { "commit=$notification sent";  }
-            }
+    private fun validateNextCommit(commit: Commit, textCommits: CommitsBroker) {
+        if (commit.metadata.index != textCommits.size()) {
+            throw CommitNotInOrderException()
         }
-    }
-
-    private fun validateNextCommit(commit: Commit, textCommits: List<Commit>): Boolean {
-        return commit.metadata.index == textCommits.size
     }
 }
 
 sealed class CommitsNotification {
     object TextCommitsNotExist: CommitsNotification()
-    object IllegalCommit: CommitsNotification()
+    object CommitNotInOrder: CommitsNotification()
+    data class IllegalCommit(val commit: Commit): CommitsNotification()
     data class NextCommit(val commit: Commit): CommitsNotification()
 }

@@ -85,7 +85,7 @@ fun Route.commits() {
 
         val websocketSession = this
 
-        val notificationsChannel = commitsService.connect(textHash)
+        val (listenerId, notificationsChannel) = commitsService.connect(textHash)
 
         commitsService.getCommits(textHash).forEach { outgoing.send(it) }
 
@@ -98,48 +98,33 @@ fun Route.commits() {
                                 outgoing.send(it.commit)
                             }
                             is CommitsNotification.IllegalCommit -> {
-                                notificationsChannel.cancel()
-                                websocketSession.close()
+                                logger.error { "Client sent illegal commit=${it.commit}" }
+                            }
+                            is CommitsNotification.CommitNotInOrder -> {
+                                logger.warn { "Client sent unexpected order commit" }
                             }
                             is CommitsNotification.TextCommitsNotExist -> {
+                                logger.error { "Text for the commit is already deleted" }
                                 notificationsChannel.cancel()
                                 websocketSession.close()
                             }
                         }
                     }
-//                incoming.onReceiveOrClosed {
-//                    when(it.valueOrNull) {
-//                        null -> throw RuntimeException("websocket session was closed")
-//                        is Frame ->
-//                            if (textRole.writePrivileges()) {
-//                            when (it.value) {
-//                                is Frame.Text -> {
-//                                    val msg = (it.value as Frame.Text).readText()
-//                                    logger.info { "message came: $msg" }
-//                                    val commit = gson.fromJson(msg, Commit::class.java)
-//                                    logger.info { "message parsed from json : $commit" }
-//
-//                                    commitsService.commitIncomingChannel.send(textHash to commit)
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
                     incoming.onReceive {
                         if (textRole.writePrivileges()) {
                             val msg = (it as Frame.Text).readText()
                             logger.info { "message came: $msg" }
                             val commit = gson.fromJson(msg, Commit::class.java)
                             logger.info { "message parsed from json : $commit" }
-                            commitsService.commitIncomingChannel.send(textHash to commit)
+                            commitsService.commitIncomingChannel.send(Triple(textHash, commit, notificationsChannel))
                         }
                     }
                 }
             }
 
         } catch (e: Exception) {
-            commitsService.deleteOldChannelsChannel.send(textHash to notificationsChannel)
+            commitsService.unsubscribeCommitsListener(textHash, listenerId)
+            notificationsChannel.cancel()
             logger.error { "Websocket ended with ${e.cause}" }
         }
     }
