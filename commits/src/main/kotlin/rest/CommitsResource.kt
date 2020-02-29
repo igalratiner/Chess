@@ -8,6 +8,7 @@ import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.cio.websocket.Frame
+import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.http.cio.websocket.readText
 import io.ktor.request.receive
 import io.ktor.response.respond
@@ -18,6 +19,7 @@ import io.ktor.routing.post
 import io.ktor.websocket.webSocket
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.selects.selectUnbiased
 import mu.KotlinLogging
@@ -46,6 +48,11 @@ fun Route.commits() {
         send(Frame.Text(commit.toJson()))
     }
 
+    fun disconnectFromCommits(notificationsChannel: Channel<CommitsNotification>, textHash: String, listenerId: Int) {
+        commitsService.unsubscribeCommitsListener(textHash, listenerId)
+        notificationsChannel.cancel()
+    }
+
     authenticate(TEXT_ACCESS_AUTH) {
 
 
@@ -64,8 +71,10 @@ fun Route.commits() {
                     logger.info { "creation of commits requested for text hash: $textHash" }
 
                     if (commitsService.createTextCommits(textHash)) {
+                        logger.info { "commits of textHash=$textHash were created" }
                         call.respond(HttpStatusCode.Created, "Created")
                     } else {
+                        logger.info { "commits of textHash=$textHash already exist" }
                         call.respond(HttpStatusCode.Found, "commits queue exists already")
                     }
                 }
@@ -107,7 +116,7 @@ fun Route.commits() {
                             }
                             is CommitsNotification.TextCommitsNotExist -> {
                                 logger.error { "Text for the commit is already deleted" }
-                                notificationsChannel.cancel()
+                                disconnectFromCommits(notificationsChannel, textHash, listenerId)
                                 websocketSession.close()
                             }
                         }
@@ -125,8 +134,7 @@ fun Route.commits() {
             }
 
         } catch (e: Exception) {
-            commitsService.unsubscribeCommitsListener(textHash, listenerId)
-            notificationsChannel.cancel()
+            disconnectFromCommits(notificationsChannel, textHash, listenerId)
             logger.error { "Websocket ended with ${e.cause}" }
         }
     }

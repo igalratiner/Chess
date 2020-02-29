@@ -46,14 +46,7 @@ class CommitsService @Inject constructor(private val redissonClient: RedissonCli
     }
 
     fun createTextCommits(textHash: String): Boolean {
-        if (textHashes.add(textHash)) {
-            val textCommitsBroker = redissonClient.getCommitsBroker(textHash)
-            textCommitsBrokersMap[textHash] = textCommitsBroker
-            logger.info { "commits of textHash=$textHash were created" }
-            return true
-        }
-        logger.info { "commits of textHash=$textHash already exist" }
-        return false
+        return textHashes.add(textHash)
     }
 
     fun getCommits(textHash: String, commitRequests: List<CommitRequest>? = null): List<Commit> {
@@ -73,13 +66,11 @@ class CommitsService @Inject constructor(private val redissonClient: RedissonCli
         if (!textHashes.contains(textHash)) {
             throw TextCommitsNotExistException()
         }
-        val textCommitsBrokers = textCommitsBrokersMap[textHash]
-        if (textCommitsBrokers == null) {
+        return textCommitsBrokersMap[textHash] ?: run {
             val textCommitsBrokersFromDB = redissonClient.getCommitsBroker(textHash)
             textCommitsBrokersMap.putIfAbsent(textHash, textCommitsBrokersFromDB)
-            return textCommitsBrokersFromDB
+            textCommitsBrokersFromDB
         }
-        return textCommitsBrokers
     }
 
     fun deleteCommits(textHash: String) {
