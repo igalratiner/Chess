@@ -13,12 +13,14 @@ import io.ktor.auth.Authentication
 import io.ktor.auth.Principal
 import io.ktor.auth.authentication
 import io.ktor.auth.jwt.jwt
+import mu.KotlinLogging
 import pojo.TextDetails
 import pojo.TextRole
 
 private val gson = Gson()
 
 const val TEXT_ACCESS_AUTH = "textAccessAuth"
+val logger = KotlinLogging.logger {}
 
 
 fun Application.textAccessAuthenticatedModule() {
@@ -26,9 +28,15 @@ fun Application.textAccessAuthenticatedModule() {
         jwt(TEXT_ACCESS_AUTH) {
             verifier(TextJwtConfig.verifier)
             realm = "ktor.io"
+            logger.info { "entering validation" }
             validate {
+                logger.info { "entering validation in validate" }
                 val textDetails: TextDetails = it.payload.getClaim(TEXT_DETAILS_CLAIM).asString().run { gson.fromJson(this, TextDetails::class.java) }
+                logger.info { "textDetails: $textDetails" }
+
                 val textRole: TextRole = it.payload.getClaim(TEXT_ROLE_CLAIM).asString().let(TextRole::valueOf)
+                logger.info { "textRole: $textRole"}
+
                 TextPrincipal(textDetails, textRole)
             }
         }

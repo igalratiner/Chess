@@ -1,4 +1,3 @@
-import authentication.accountAuthenticatedModule
 import authentication.textAccessAuthenticatedModule
 import di.CommitsModule
 import io.ktor.application.Application
@@ -14,7 +13,7 @@ fun Application.module() {
     textAccessAuthenticatedModule()
     install(Koin) {
         slf4jLogger()
-        modules(CommitsModule, getExposedModule("commits"))
+        modules(CommitsModule)
     }
     install(WebSockets) {
         maxFrameSize = Long.MAX_VALUE // Disabled (max value). The connection will be closed if surpassed this length.

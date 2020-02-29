@@ -98,21 +98,6 @@ class TextsResource @Inject constructor(application: Application, textsService: 
                                 // go to texts and delete textHash
                             }
                         }
-
-                        // roles allowed Owner + Editor
-                        rolesAllowed(OWNER, EDITOR) {
-                            put {
-                                textsService.updateText()
-                                // update text
-                            }
-                        }
-
-                        // roles allowed Owner + Editor + Reader
-                        rolesAllowed(OWNER, EDITOR, READER) {
-                            get {
-                                // get text
-                            }
-                        }
                     }
                 }
             }

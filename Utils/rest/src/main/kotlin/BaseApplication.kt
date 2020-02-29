@@ -5,8 +5,11 @@ import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
 import io.ktor.features.StatusPages
+import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.jackson.jackson
 import io.ktor.response.respond
 import org.slf4j.event.Level
 import java.text.DateFormat
@@ -21,6 +24,7 @@ fun Application.baseModule() {
         gson {
             setDateFormat(DateFormat.LONG)
             setPrettyPrinting()
+            register(ContentType.Application.Json, GsonConverter())
         }
     }
     install(StatusPages) {

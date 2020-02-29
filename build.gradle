@@ -26,6 +26,9 @@ subprojects {
         compile "org.koin:koin-ktor:$koin_version"
         compile "org.koin:koin-logger-slf4j:$koin_version"
 
+        // jackson
+        compile "io.ktor:ktor-jackson:$ktor_version"
+
         testCompile "org.koin:koin-test:$koin_version"
 
         // Logging
