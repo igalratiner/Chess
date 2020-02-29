@@ -4,7 +4,7 @@ import TextJwtConfig
 import TextJwtConfig.TEXT_DETAILS_CLAIM
 import TextJwtConfig.TEXT_ROLE_CLAIM
 import aurthorization.RoleAuthorization
-import aurthorization.RoleAuthorizationException
+import aurthorization.exceptions.RoleAuthorizationException
 import com.google.gson.Gson
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall

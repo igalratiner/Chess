@@ -1,6 +1,6 @@
 package services
 
-import authentication.SessionAuthenticationException
+import authentication.exceptions.SessionAuthenticationException
 import client.AccountsClient
 import com.google.inject.Inject
 import crypto.MD5_LENGTH

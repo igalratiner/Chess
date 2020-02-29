@@ -1,5 +1,5 @@
-import aurthorization.RoleAuthorizationException
-import authentication.AuthenticationException
+import aurthorization.exceptions.RoleAuthorizationException
+import authentication.exceptions.AuthenticationException
 import io.ktor.application.*
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
@@ -9,7 +9,6 @@ import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
 import io.ktor.response.respond
 import org.slf4j.event.Level
 import java.text.DateFormat

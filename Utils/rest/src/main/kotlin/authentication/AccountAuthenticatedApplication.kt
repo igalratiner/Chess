@@ -1,5 +1,6 @@
 package authentication
 
+import authentication.exceptions.SessionAuthenticationException
 import client.AccessClient
 import com.google.gson.Gson
 import io.ktor.application.*
