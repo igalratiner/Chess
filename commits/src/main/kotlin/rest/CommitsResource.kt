@@ -19,18 +19,17 @@ import io.ktor.websocket.webSocket
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.selects.selectUnbiased
 import mu.KotlinLogging
-import org.koin.core.parameter.parametersOf
 import org.koin.ktor.ext.get
-import org.koin.ktor.ext.inject
 import pojo.Commit
 import pojo.CommitRequest
 import pojo.TextRole
+import pojo.TextRole.READER
+import pojo.TextRole.OWNER
+import pojo.TextRole.EDITOR
 import services.CommitsNotification
 import services.CommitsService
-import java.lang.RuntimeException
 
 @UseExperimental(InternalCoroutinesApi::class)
 @ExperimentalCoroutinesApi
@@ -49,33 +48,36 @@ fun Route.commits() {
 
     authenticate(TEXT_ACCESS_AUTH) {
 
-        get {
-            val requestedCommits = call.receive<List<CommitRequest>>()
-            call.respond(commitsService.getCommits(call.textRequest!!.textDetails.hash, requestedCommits))
-        }
 
-        rolesAllowed(TextRole.OWNER) {
-            post {
-                logger.info { "creation of commits requested" }
-                val textHash = call.textRequest!!.textDetails.hash
+        rolesAllowed(OWNER, EDITOR, READER) {
+            get {
+                val requestedCommits = call.receive<List<CommitRequest>>()
+                call.respond(commitsService.getCommits(call.textRequest!!.textDetails.hash, requestedCommits))
 
-                logger.info { "creation of commits requested for text hash: $textHash" }
+            }
 
-                if (commitsService.createTextCommits(textHash)) {
-                    call.respond(HttpStatusCode.Created, "Created")
-                } else {
-                    call.respond(HttpStatusCode.Found, "commits queue exists already")
+            rolesAllowed(OWNER) {
+                post {
+                    logger.info { "creation of commits requested" }
+                    val textHash = call.textRequest!!.textDetails.hash
+
+                    logger.info { "creation of commits requested for text hash: $textHash" }
+
+                    if (commitsService.createTextCommits(textHash)) {
+                        call.respond(HttpStatusCode.Created, "Created")
+                    } else {
+                        call.respond(HttpStatusCode.Found, "commits queue exists already")
+                    }
+                }
+
+                delete {
+                    val textHash = call.textRequest!!.textDetails.hash
+                    logger.info { "deletion of commits of textHash=$textHash requested" }
+                    commitsService.deleteCommits(textHash)
+                    call.respond("Text hash=$textHash was deleted")
                 }
             }
-
-            delete {
-                val textHash = call.textRequest!!.textDetails.hash
-                logger.info { "deletion of commits of textHash=$textHash requested" }
-                commitsService.deleteCommits(textHash)
-                call.respond("Text hash=$textHash was deleted")
-            }
         }
-
     }
 
     webSocket("/hash/{HASH}/role/{ROLE}") { // todo not secured at all validation needed
