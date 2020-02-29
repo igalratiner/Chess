@@ -1,9 +1,14 @@
 package rest
 
+import TextJwtConfig.TEXT_DETAILS_CLAIM
+import TextJwtConfig.TEXT_ROLE_CLAIM
 import aurthorization.rolesAllowed
 import authentication.TEXT_ACCESS_AUTH
 import authentication.textRequest
+import com.google.common.hash.Hashing.hmacSha256
+import com.google.common.hash.Hashing.hmacSha512
 import com.google.gson.Gson
+import io.jsonwebtoken.Jwts
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
@@ -26,6 +31,7 @@ import mu.KotlinLogging
 import org.koin.ktor.ext.get
 import pojo.Commit
 import pojo.CommitRequest
+import pojo.TextDetails
 import pojo.TextRole
 import pojo.TextRole.READER
 import pojo.TextRole.OWNER
@@ -89,9 +95,18 @@ fun Route.commits() {
         }
     }
 
-    webSocket("/hash/{HASH}/role/{ROLE}") { // todo not secured at all validation needed
-        val textHash = call.parameters["HASH"]!!
-        val textRole = TextRole.valueOf(call.parameters["ROLE"]!!)
+    webSocket("/{JWT}") { // todo not secured at all validation needed
+
+        val claims = Jwts.parserBuilder()
+                .requireIssuer("http://localhost:1581")
+                .setSigningKey("cBDMBZAB423Iz0MZopTWBZAB423IzBZAB423IzBZAB423IzBZAB423IzBZAB423IzBZAB423IzBZAB423Iz".toByteArray())
+                .build()
+                .parseClaimsJws(call.parameters["JWT"]!!)
+                .body
+
+        val textHash = claims[TEXT_DETAILS_CLAIM].toString().run { gson.fromJson(this, TextDetails::class.java) }.hash
+        val textRole = claims[TEXT_ROLE_CLAIM].toString().let(TextRole::valueOf)
+
         logger.info { "hash: $textHash and role: $textRole" }
 
         val websocketSession = this
