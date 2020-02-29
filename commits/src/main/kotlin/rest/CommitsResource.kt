@@ -95,7 +95,7 @@ fun Route.commits() {
         }
     }
 
-    webSocket("/{JWT}") { // todo not secured at all validation needed
+    webSocket("/{JWT}") {
 
         val claims = Jwts.parserBuilder()
                 .requireIssuer("http://localhost:1581")
