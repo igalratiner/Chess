@@ -2,18 +2,16 @@ package rest
 
 import TextJwtConfig.TEXT_DETAILS_CLAIM
 import TextJwtConfig.TEXT_ROLE_CLAIM
+import `object`.exhaustive
 import aurthorization.rolesAllowed
 import authentication.TEXT_ACCESS_AUTH
 import authentication.textRequest
-import com.google.common.hash.Hashing.hmacSha256
-import com.google.common.hash.Hashing.hmacSha512
 import com.google.gson.Gson
 import io.jsonwebtoken.Jwts
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.cio.websocket.Frame
-import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.http.cio.websocket.readText
 import io.ktor.request.receive
 import io.ktor.response.respond
@@ -23,8 +21,6 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.websocket.webSocket
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.selects.selectUnbiased
 import mu.KotlinLogging
@@ -33,13 +29,11 @@ import pojo.Commit
 import pojo.CommitRequest
 import pojo.TextDetails
 import pojo.TextRole
-import pojo.TextRole.READER
-import pojo.TextRole.OWNER
-import pojo.TextRole.EDITOR
+import pojo.TextRole.*
 import services.CommitsNotification
 import services.CommitsService
+import services.exceptions.TextCommitsNotExistException
 
-@UseExperimental(InternalCoroutinesApi::class)
 @ExperimentalCoroutinesApi
 fun Route.commits() {
     val commitsService: CommitsService = get()
@@ -52,11 +46,6 @@ fun Route.commits() {
 
     suspend fun SendChannel<Frame>.send(commit: Commit) {
         send(Frame.Text(commit.toJson()))
-    }
-
-    fun disconnectFromCommits(notificationsChannel: Channel<CommitsNotification>, textHash: String, listenerId: Int) {
-        commitsService.unsubscribeCommitsListener(textHash, listenerId)
-        notificationsChannel.cancel()
     }
 
     authenticate(TEXT_ACCESS_AUTH) {
@@ -109,16 +98,14 @@ fun Route.commits() {
 
         logger.info { "hash: $textHash and role: $textRole" }
 
-        val websocketSession = this
-
-        val (listenerId, notificationsChannel) = commitsService.connect(textHash)
+        val connectionId = commitsService.connect(textHash)
 
         commitsService.getCommits(textHash).forEach { outgoing.send(it) }
 
         try {
-            while(true) {
+            while (true) {
                 selectUnbiased<Unit> {
-                    notificationsChannel.onReceive {
+                    commitsService.getCommitsNotificationChannel(connectionId).onReceive {
                         when (it) {
                             is CommitsNotification.NextCommit -> {
                                 outgoing.send(it.commit)
@@ -131,10 +118,9 @@ fun Route.commits() {
                             }
                             is CommitsNotification.TextCommitsNotExist -> {
                                 logger.error { "Text for the commit is already deleted" }
-                                disconnectFromCommits(notificationsChannel, textHash, listenerId)
-                                websocketSession.close()
+                                throw TextCommitsNotExistException()
                             }
-                        }
+                        }.exhaustive
                     }
                     incoming.onReceive {
                         if (textRole.writePrivileges()) {
@@ -142,14 +128,14 @@ fun Route.commits() {
                             logger.info { "message came: $msg" }
                             val commit = gson.fromJson(msg, Commit::class.java)
                             logger.info { "message parsed from json : $commit" }
-                            commitsService.commitIncomingChannel.send(Triple(textHash, commit, notificationsChannel))
+                            commitsService.commitIncomingChannel.send(connectionId to commit)
                         }
                     }
                 }
             }
 
         } catch (e: Exception) {
-            disconnectFromCommits(notificationsChannel, textHash, listenerId)
+            commitsService.disconnectFromCommits(connectionId, textHash)
             logger.error { "Websocket ended with ${e.cause}" }
         }
     }

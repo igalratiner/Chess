@@ -14,6 +14,7 @@ include ':utils:json'
 include ':utils:database'
 include ':utils:security'
 include ':utils:rest'
+include ':utils:common'
 
 rootProject.children.each {
     subproject -> subproject.buildFileName = "${subproject.name}.gradle"

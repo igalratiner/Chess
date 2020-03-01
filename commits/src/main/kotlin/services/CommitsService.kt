@@ -16,18 +16,20 @@ class CommitsService @Inject constructor(private val redissonClient: RedissonCli
 
     companion object : KLogging()
 
-    val commitIncomingChannel = Channel<Triple<String, Commit, Channel<CommitsNotification>>>()
+    val commitIncomingChannel = Channel<Pair<UUID, Commit>>()
 
     private val textCommitsBrokersMap = HashMap<String, CommitsBroker>()
 
     private val textHashes = redissonClient.getSet<String>("texts")
+
+    private val connectionDetails = HashMap<UUID, Triple<Int, Channel<CommitsNotification>, String>>()
 
     init {
         GlobalScope.distributeCommits()
     }
 
     @ExperimentalCoroutinesApi
-    fun connect(textHash: String): Pair<Int, Channel<CommitsNotification>> {
+    fun connect(textHash: String): UUID {
         return runBlocking {
             logger.info { "connection to textHash=$textHash requested" }
             val textCommitsBroker = populateAndRetrieveCommitsBroker(textHash)
@@ -40,8 +42,15 @@ class CommitsService @Inject constructor(private val redissonClient: RedissonCli
                 }
             }
 
+            var connectionId: UUID
+            do {
+                connectionId = UUID.fromString(notificationChannel.toString() + listenerId.toString() + Math.random())
+            } while (!connectionDetails.containsKey(connectionId))
+
+            connectionDetails[connectionId] = Triple(listenerId, notificationChannel, textHash)
+
             logger.info { "connection to textHash=$textHash commits established" }
-            listenerId to notificationChannel
+            connectionId
         }
     }
 
@@ -59,7 +68,15 @@ class CommitsService @Inject constructor(private val redissonClient: RedissonCli
             return commitsRequested
         }
         return textCommitsBroker.getAll()
+    }
 
+    fun getCommitsNotificationChannel(connectionId: UUID): Channel<CommitsNotification> {
+        return connectionDetails[connectionId]!!.second
+    }
+
+    fun disconnectFromCommits(connectionId: UUID, textHash: String) {
+        textCommitsBrokersMap[textHash]?.unsubscribe(connectionDetails[connectionId]!!.first)
+        connectionDetails[connectionId]!!.second.cancel()
     }
 
     private fun populateAndRetrieveCommitsBroker(textHash: String): CommitsBroker {
@@ -88,21 +105,17 @@ class CommitsService @Inject constructor(private val redissonClient: RedissonCli
         repeat(1) { addCommits() }
     }
 
-    fun unsubscribeCommitsListener(textHash: String, listenerId: Int) {
-        textCommitsBrokersMap[textHash]?.unsubscribe(listenerId)
-    }
-
     private fun CoroutineScope.addCommits() = launch {
-        for ((textHash, commit, notificationChannel) in commitIncomingChannel) {
+        for ((connectionId, commit) in commitIncomingChannel) {
             logger.info { "commit=$commit is about to be sent";  }
             try {
-                val textCommits = textCommitsBrokersMap[textHash] ?: throw TextCommitsNotExistException()
+                val textCommits = textCommitsBrokersMap[connectionDetails[connectionId]!!.third] ?: throw TextCommitsNotExistException()
                 validateNextCommit(commit, textCommits)
                 textCommits.addCommit(commit)
             } catch (e: TextCommitsNotExistException) {
-                notificationChannel.send(CommitsNotification.TextCommitsNotExist)
+                connectionDetails[connectionId]!!.second.send(CommitsNotification.TextCommitsNotExist)
             } catch (e: CommitNotInOrderException) {
-                notificationChannel.send(CommitsNotification.CommitNotInOrder)
+                connectionDetails[connectionId]!!.second.send(CommitsNotification.CommitNotInOrder)
             }
             logger.info { "commit=$commit was sent";  }
         }
