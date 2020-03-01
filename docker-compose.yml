@@ -15,13 +15,6 @@ services:
     ports:
       - "5116:5000"
 
-  game-master:
-    build:
-      context: .
-      dockerfile: ./game-master/Dockerfile
-    ports:
-      - "5117:5000"
-
   texts:
     build:
       context: .
